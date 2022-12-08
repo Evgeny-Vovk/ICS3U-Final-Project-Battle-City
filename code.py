@@ -8,7 +8,9 @@ import ugame
 import stage
 import constants
 import time
-
+import random
+import math
+DEBUG = 0
 
 def splash_scene():
     # this function is the main game game_scene
@@ -17,7 +19,8 @@ def splash_scene():
     coin_sound = open("coin.wav", "rb")
     sound = ugame.audio
     sound.stop()
-    sound.mute(False)
+    if DEBUG:
+        sound.mute(False)
     sound.play(coin_sound)
 
     image_bank_background = stage.Bank.from_bmp16("mt_game_studio.bmp")
@@ -65,7 +68,10 @@ def splash_scene():
     while True:
         # Wait for 2 seconds
         time.sleep(2.0)
-        menu_scene()
+        if DEBUG:
+            menu_scene()
+        else:
+            level_one_game_scene()
 
 def menu_scene():
     # this function is the main game game_scene
@@ -78,10 +84,10 @@ def menu_scene():
     position_of_tiles_y = 0
     tile = 0
     tiles = []
-    image_bank_backgroundp1 = stage.Bank.from_bmp16("menu_background_part_one.bmp")
+    image_bank_background = stage.Bank.from_bmp16("menu_background_part_one.bmp")
     while tile < 16:
         a_single_tile = stage.Sprite(
-            image_bank_backgroundp1,
+            image_bank_background,
             tile,
             position_of_tiles_x,
             position_of_tiles_y,
@@ -94,10 +100,10 @@ def menu_scene():
         tiles.append(a_single_tile)
     tile = 0
 
-    image_bank_backgroundp2 = stage.Bank.from_bmp16("menu_background_part_two.bmp")
+    image_bank_background = stage.Bank.from_bmp16("menu_background_part_two.bmp")
     while tile < 16:
         a_single_tile = stage.Sprite(
-            image_bank_backgroundp2,
+            image_bank_background,
             tile,
             position_of_tiles_x,
             position_of_tiles_y,
@@ -141,10 +147,10 @@ def menu_scene():
         tiles.append(a_single_tile)
     tile = 0
 
-    image_bank_backgroundp4 = stage.Bank.from_bmp16("menu_background_part_four.bmp")
+    image_bank_background = stage.Bank.from_bmp16("menu_background_part_four.bmp")
     while tile < 16:
         a_single_tile = stage.Sprite(
-            image_bank_backgroundp4,
+            image_bank_background,
             tile,
             position_of_tiles_x,
             position_of_tiles_y,
@@ -157,10 +163,10 @@ def menu_scene():
         tiles.append(a_single_tile)
     tile = 0
 
-    image_bank_backgroundp5 = stage.Bank.from_bmp16("menu_background_part_five.bmp")
+    image_bank_background = stage.Bank.from_bmp16("menu_background_part_five.bmp")
     while tile < 16:
         a_single_tile = stage.Sprite(
-            image_bank_backgroundp5,
+            image_bank_background,
             tile,
             position_of_tiles_x,
             position_of_tiles_y,
@@ -219,12 +225,222 @@ def menu_scene():
             mode = 1
         if keys & ugame.K_START != 0:
             if mode == 0:
-                print("play scene begins")
+                level_one_scene()
             elif mode == 1:
-                print("controls scene begins")
+                controls_scene()
 
         # redraw Sprites
         game.render_sprites([tank])
+        game.tick()
+
+def controls_scene():
+    pass
+
+def level_one_scene():
+    game_start = open("game_start.wav", "rb")
+    sound = ugame.audio
+    sound.stop()
+    sound.mute(False)
+    sound.play(game_start)
+
+    position_of_tiles_x = 80
+    position_of_tiles_y = 32
+    tile = 0
+    level_tiles = []
+    image_level_bank_background = stage.Bank.from_bmp16("level_one_backgroundp1.bmp")
+    while tile < 16:
+        a_single_tile = stage.Sprite(
+            image_level_bank_background,
+            tile,
+            position_of_tiles_x,
+            position_of_tiles_y,
+        )
+        position_of_tiles_x += 16
+        tile += 1
+        if position_of_tiles_x == 160:
+            position_of_tiles_y += 16
+            position_of_tiles_x = 0
+        level_tiles.append(a_single_tile)
+    tile = 0
+
+    image_level_bank_background = stage.Bank.from_bmp16("level_one_backgroundp2.bmp")
+    while tile < 16:
+        a_single_tile = stage.Sprite(
+            image_level_bank_background,
+            tile,
+            position_of_tiles_x,
+            position_of_tiles_y,
+        )
+        position_of_tiles_x += 16
+        tile += 1
+        if position_of_tiles_x == 160:
+            position_of_tiles_y += 16
+            position_of_tiles_x = 0
+        level_tiles.append(a_single_tile)
+
+    game = stage.Stage(ugame.display, constants.FPS)
+    game.layers = level_tiles
+    game.render_block()
+
+    while True:
+        # Wait for 4 seconds
+        time.sleep(4.3)
+        level_one_game_scene()
+
+def level_one_game_scene():
+    level_start = open("game_sound.wav", "rb")
+    sound = ugame.audio
+    sound.stop()
+    if DEBUG:
+        sound.mute(False)
+    sound.play(level_start, loop = True)
+
+    a_button = constants.button_state["button_up"]
+    b_button = constants.button_state["button_up"]
+    start_button = constants.button_state["button_up"]
+    select_button = constants.button_state["button_up"]
+
+    image_bank_sprites = stage.Bank.from_bmp16("sprite_sheetp1.bmp")
+    image_bank_sprites2 = stage.Bank.from_bmp16("sprite_sheetp2.bmp")
+    bushes = []
+    bush_x = 48
+    while bush_x < 160:
+        bush = stage.Sprite(
+            image_bank_sprites,
+            5,
+            bush_x,
+            16,
+        )
+        bush_x += 16
+        bushes.append(bush)
+
+    tank = stage.Sprite(
+            image_bank_sprites,
+            8,
+            64,
+            112,
+        )
+
+    enemies = []
+    for enemy_number in range(constants.TOTAL_NUMBER_OF_ENEMIES):
+        an_enemy = stage.Sprite(
+            image_bank_sprites2,
+            0,
+            constants.OFF_SCREEN_X,
+            constants.OFF_SCREEN_Y,
+        )
+        enemies.append(an_enemy)
+
+    bullets = []
+    for bullet_number in range(constants.TOTAL_NUMBER_OF_LASERS):
+        a_bullet = stage.Sprite(
+            image_bank_sprites,
+            11,
+            constants.OFF_SCREEN_X,
+            constants.OFF_SCREEN_Y,
+        )
+        bullets.append(a_bullet)
+
+    game = stage.Stage(ugame.display, constants.FPS)
+    game.layers = bushes + [tank] + enemies + bullets
+    game.render_block()
+
+    #start = int(time.monotonic())
+    #last = -1
+    start = int(time.monotonic())
+    next = random.randint(0,4)
+    tank_direction = 1
+    while True:
+        current = int(time.monotonic()) - start
+        keys = ugame.buttons.get_pressed()
+
+        if keys & ugame.K_X:
+            pass
+        if keys & ugame.K_O != 0:
+            if a_button == constants.button_state["button_up"]:
+                a_button = constants.button_state["button_just_pressed"]
+            elif a_button == constants.button_state["button_just_pressed"]:
+                a_button = constants.button_state["button_still_pressed"]
+        else:
+            if a_button == constants.button_state["button_still_pressed"]:
+                a_button = constants.button_state["button_released"]
+            else:
+                a_button = constants.button_state["button_up"]
+        if keys & ugame.K_UP != 0:
+            tank.move(tank.x, tank.y - 1)
+            tank.set_frame(8)
+            tank_direction = 1
+            if tank.y < 0:
+                tank.move(tank.x,0)
+        if keys & ugame.K_DOWN != 0:
+            tank.move(tank.x, tank.y + 1)
+            tank.set_frame(7)
+            tank_direction = 2
+            if tank.y > 112:
+                tank.move(tank.x,112)
+        if keys & ugame.K_LEFT != 0:
+            tank.move(tank.x - 1, tank.y)
+            tank.set_frame(9)
+            tank_direction = 3
+            if tank.x < 0:
+                tank.move(0,tank.y)
+        if keys & ugame.K_RIGHT != 0:
+            tank.move(tank.x + 1, tank.y)
+            tank.set_frame(10)
+            tank_direction = 4
+            if tank.x > 144:
+                tank.move(144,tank.y)
+        if keys & ugame.K_START != 0:
+            pass
+
+        #if last < int(current / 4):
+        #    last = int(current / 4)
+        if current >= next:
+            random_number = random.randint(1,4)
+            next += random_number
+            for enemy_number in range(len(enemies)):
+                if enemies[enemy_number].x < 0:
+                    enemies[enemy_number].move(random.randint(0, 144), 0)
+                    break
+        
+
+        if a_button == constants.button_state["button_just_pressed"]:
+            for bullet_number in range(len(bullets)):
+                if bullets[bullet_number].x < 0:
+                    bullets[bullet_number].move(tank.x, tank.y)
+                    bullet_direction = tank_direction
+                    break
+
+        for bullet_number in range(len(bullets)):
+            if bullets[bullet_number].x != constants.OFF_SCREEN_X:
+                if bullet_direction == 1:
+                    bullets[bullet_number].move(
+                        bullets[bullet_number].x,
+                        bullets[bullet_number].y - 2,
+                    )
+                elif bullet_direction == 2:
+                    bullets[bullet_number].move(
+                        bullets[bullet_number].x,
+                        bullets[bullet_number].y + 2,
+                    )
+                elif bullet_direction == 3:
+                    bullets[bullet_number].move(
+                        bullets[bullet_number].x - 2,
+                        bullets[bullet_number].y,
+                    )
+                elif bullet_direction == 4:
+                    bullets[bullet_number].move(
+                        bullets[bullet_number].x + 2,
+                        bullets[bullet_number].y,
+                    )
+            if bullets[bullet_number].y < -16 or bullets[bullet_number].y > 128 or bullets[bullet_number].x < -16 or bullets[bullet_number].x > 160:
+                    bullets[bullet_number].move(
+                        constants.OFF_SCREEN_X,
+                        constants.OFF_SCREEN_Y,
+                    )
+
+        # redraw Sprites
+        game.render_sprites([tank] + enemies + bullets)
         game.tick()
 
 if __name__ == "__main__":
