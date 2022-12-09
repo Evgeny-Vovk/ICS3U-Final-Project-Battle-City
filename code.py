@@ -314,6 +314,18 @@ def level_one_game_scene():
         bush_x += 16
         bushes.append(bush)
 
+    brick_walls = []
+    brick_wall_x = 80
+    while brick_wall_x < 160:
+        brick_wall = stage.Sprite(
+            image_bank_sprites,
+            4,
+            brick_wall_x,
+            80,
+        )
+        brick_wall_x += 16
+        brick_walls.append(brick_wall)
+
     tank = stage.Sprite(
             image_bank_sprites,
             8,
@@ -342,14 +354,16 @@ def level_one_game_scene():
         bullets.append(a_bullet)
 
     game = stage.Stage(ugame.display, constants.FPS)
-    game.layers = bushes + [tank] + enemies + bullets
+    game.layers = bushes + brick_walls + [tank] + enemies + bullets
     game.render_block()
 
     #start = int(time.monotonic())
     #last = -1
     start = int(time.monotonic())
     next = random.randint(0,4)
+    next2 = random.randint(1,4)
     tank_direction = 1
+    enemy_tank_direction = 1
     while True:
         current = int(time.monotonic()) - start
         keys = ugame.buttons.get_pressed()
@@ -371,25 +385,25 @@ def level_one_game_scene():
             tank.set_frame(8)
             tank_direction = 1
             if tank.y < 0:
-                tank.move(tank.x,0)
+                tank.move(tank.x, tank.y + 1)
         if keys & ugame.K_DOWN != 0:
             tank.move(tank.x, tank.y + 1)
             tank.set_frame(7)
             tank_direction = 2
             if tank.y > 112:
-                tank.move(tank.x,112)
+                tank.move(tank.x,tank.y - 1)
         if keys & ugame.K_LEFT != 0:
             tank.move(tank.x - 1, tank.y)
             tank.set_frame(9)
             tank_direction = 3
             if tank.x < 0:
-                tank.move(0,tank.y)
+                tank.move(tank.x + 1,tank.y)
         if keys & ugame.K_RIGHT != 0:
             tank.move(tank.x + 1, tank.y)
             tank.set_frame(10)
             tank_direction = 4
             if tank.x > 144:
-                tank.move(144,tank.y)
+                tank.move(tank.x - 1,tank.y)
         if keys & ugame.K_START != 0:
             pass
 
@@ -402,8 +416,8 @@ def level_one_game_scene():
                 if enemies[enemy_number].x < 0:
                     enemies[enemy_number].move(random.randint(0, 144), 0)
                     break
-        
 
+        # bullet creation
         if a_button == constants.button_state["button_just_pressed"]:
             for bullet_number in range(len(bullets)):
                 if bullets[bullet_number].x < 0:
@@ -411,6 +425,7 @@ def level_one_game_scene():
                     bullet_direction = tank_direction
                     break
 
+        # bullet direction and moving
         for bullet_number in range(len(bullets)):
             if bullets[bullet_number].x != constants.OFF_SCREEN_X:
                 if bullet_direction == 1:
@@ -433,11 +448,80 @@ def level_one_game_scene():
                         bullets[bullet_number].x + 2,
                         bullets[bullet_number].y,
                     )
+            # move bullet to off screen if it gets past the screen corner
             if bullets[bullet_number].y < -16 or bullets[bullet_number].y > 128 or bullets[bullet_number].x < -16 or bullets[bullet_number].x > 160:
                     bullets[bullet_number].move(
                         constants.OFF_SCREEN_X,
                         constants.OFF_SCREEN_Y,
                     )
+
+            # make the enemy tanks choose random direction
+            if current >= next2:
+                random_number = random.randint(1,4)
+                next2 += random_number
+                for enemy_number in range(len(enemies)):
+                    enemy_tank_direction = random.randint(1,5)
+                    if enemy_tank_direction == 1 or enemy_tank_direction == 2:
+                        enemies[enemy_number].set_frame(0)
+                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y + 1)
+                    elif enemy_tank_direction == 3:
+                        enemies[enemy_number].set_frame(1)
+                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y - 1)
+                    elif enemy_tank_direction == 4:
+                        enemies[enemy_number].set_frame(2)
+                        enemies[enemy_number].move(enemies[enemy_number].x + 1, enemies[enemy_number].y)
+                    elif enemy_tank_direction == 5:
+                        enemies[enemy_number].set_frame(3)
+                        enemies[enemy_number].move(enemies[enemy_number].x - 1, enemies[enemy_number].y)
+
+            # collision between tank and a brick wall
+            for brick_wall_number in range(len(brick_walls)):
+                if brick_walls[brick_wall_number].x > 0:
+                    if tank.x > 0:
+                        if stage.collide(
+                            brick_walls[brick_wall_number].x + 2,
+                            brick_walls[brick_wall_number].y + 2,
+                            brick_walls[brick_wall_number].x + 15,
+                            brick_walls[brick_wall_number].y + 15,
+                            tank.x + 2,
+                            tank.y + 2,
+                            tank.x + 15,
+                            tank.y + 15,
+                        ): 
+                            if keys & ugame.K_DOWN != 0 or keys & ugame.K_UP != 0:
+                                if tank.y < brick_walls[brick_wall_number].y:
+                                    tank.move(tank.x, tank.y - 1)
+                                elif tank.y > brick_walls[brick_wall_number].y:
+                                    tank.move(tank.x, tank.y + 1)
+                            if keys & ugame.K_RIGHT != 0 or keys & ugame.K_LEFT != 0:
+                                if tank.x < brick_walls[brick_wall_number].x:
+                                    tank.move(tank.x - 1, tank.y)
+                                elif tank.x > brick_walls[brick_wall_number].x:
+                                    tank.move(tank.x + 1, tank.y)
+
+            # collision between two enemy tanks
+            for enemy_number in range(len(enemies)):
+                if enemies[enemy_number].x > 0:
+                    for second_enemy_number in range(len(enemies)):
+                        if enemies[second_enemy_number].x > 0:
+                            if stage.collide(
+                                enemies[enemy_number].x + 2,
+                                enemies[enemy_number].y + 2,
+                                enemies[enemy_number].x + 15,
+                                enemies[enemy_number].y + 15,
+                                enemies[second_enemy_number].x + 2,
+                                enemies[second_enemy_number].y + 2,
+                                enemies[second_enemy_number].x + 15,
+                                enemies[second_enemy_number].y + 15,
+                            ):
+                                if enemies[enemy_number].y < enemies[second_enemy_number].y:
+                                    enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y - 1)
+                                elif enemies[enemy_number].y > enemies[second_enemy_number].y:
+                                    enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y + 1)
+                                if enemies[enemy_number].x < enemies[second_enemy_number].x:
+                                    enemies[enemy_number].move(enemies[enemy_number].x - 1, enemies[enemy_number].y)
+                                elif enemies[enemy_number].x > enemies[second_enemy_number].x:
+                                    enemies[enemy_number].move(enemies[enemy_number].x + 1, enemies[enemy_number].y)
 
         # redraw Sprites
         game.render_sprites([tank] + enemies + bullets)
