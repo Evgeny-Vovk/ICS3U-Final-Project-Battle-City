@@ -2,7 +2,7 @@
 
 # Created by: Evgeny Vovk
 # Created on: 2022 Oct
-# This file is the splash/first scene for Battle City on PyBadge.
+# This file is the storage of all scenes for Battle City on PyBadge.
 
 import ugame
 import stage
@@ -359,6 +359,11 @@ def level_one_game_scene():
 
     #start = int(time.monotonic())
     #last = -1
+    first_enemy_tank_direction = 0
+    second_enemy_tank_direction = 0
+    third_enemy_tank_direction = 0
+    fourth_enemy_tank_direction = 0
+    fifth_enemy_tank_direction = 0
     start = int(time.monotonic())
     next = random.randint(0,4)
     next2 = random.randint(1,4)
@@ -463,16 +468,80 @@ def level_one_game_scene():
                     enemy_tank_direction = random.randint(1,5)
                     if enemy_tank_direction == 1 or enemy_tank_direction == 2:
                         enemies[enemy_number].set_frame(0)
-                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y + 1)
                     elif enemy_tank_direction == 3:
                         enemies[enemy_number].set_frame(1)
-                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y - 1)
                     elif enemy_tank_direction == 4:
                         enemies[enemy_number].set_frame(2)
-                        enemies[enemy_number].move(enemies[enemy_number].x + 1, enemies[enemy_number].y)
                     elif enemy_tank_direction == 5:
                         enemies[enemy_number].set_frame(3)
+                    if enemy_number == 0:
+                        first_enemy_tank_direction = enemy_tank_direction
+                    elif enemy_number == 1:
+                        second_enemy_tank_direction = enemy_tank_direction
+                    elif enemy_number == 2:
+                        third_enemy_tank_direction = enemy_tank_direction
+                    elif enemy_number == 3:
+                        fourth_enemy_tank_direction = enemy_tank_direction
+                    elif enemy_number == 4:
+                        fifth_enemy_tank_direction = enemy_tank_direction
+
+            for enemy_number in range(len(enemies)):
+                if enemy_number == 0:
+                    if first_enemy_tank_direction == 1 or first_enemy_tank_direction == 2:
+                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y + 1)
+                    elif first_enemy_tank_direction == 3:
+                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y - 1)
+                    elif first_enemy_tank_direction == 4:
+                        enemies[enemy_number].move(enemies[enemy_number].x + 1, enemies[enemy_number].y)
+                    elif first_enemy_tank_direction == 5:
                         enemies[enemy_number].move(enemies[enemy_number].x - 1, enemies[enemy_number].y)
+                elif enemy_number == 1:
+                    if second_enemy_tank_direction == 1 or second_enemy_tank_direction == 2:
+                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y + 1)
+                    elif second_enemy_tank_direction == 3:
+                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y - 1)
+                    elif second_enemy_tank_direction == 4:
+                        enemies[enemy_number].move(enemies[enemy_number].x + 1, enemies[enemy_number].y)
+                    elif second_enemy_tank_direction == 5:
+                        enemies[enemy_number].move(enemies[enemy_number].x - 1, enemies[enemy_number].y)
+                elif enemy_number == 2:
+                    if third_enemy_tank_direction == 1 or third_enemy_tank_direction == 2:
+                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y + 1)
+                    elif third_enemy_tank_direction == 3:
+                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y - 1)
+                    elif third_enemy_tank_direction == 4:
+                        enemies[enemy_number].move(enemies[enemy_number].x + 1, enemies[enemy_number].y)
+                    elif third_enemy_tank_direction == 5:
+                        enemies[enemy_number].move(enemies[enemy_number].x - 1, enemies[enemy_number].y)
+                elif enemy_number == 3:
+                    if fourth_enemy_tank_direction == 1 or fourth_enemy_tank_direction == 2:
+                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y + 1)
+                    elif fourth_enemy_tank_direction == 3:
+                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y - 1)
+                    elif fourth_enemy_tank_direction == 4:
+                        enemies[enemy_number].move(enemies[enemy_number].x + 1, enemies[enemy_number].y)
+                    elif fourth_enemy_tank_direction == 5:
+                        enemies[enemy_number].move(enemies[enemy_number].x - 1, enemies[enemy_number].y)
+                elif enemy_number == 4:
+                    if fifth_enemy_tank_direction == 1 or fifth_enemy_tank_direction == 2:
+                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y + 1)
+                    elif fifth_enemy_tank_direction == 3:
+                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y - 1)
+                    elif fifth_enemy_tank_direction == 4:
+                        enemies[enemy_number].move(enemies[enemy_number].x + 1, enemies[enemy_number].y)
+                    elif fifth_enemy_tank_direction == 5:
+                        enemies[enemy_number].move(enemies[enemy_number].x - 1, enemies[enemy_number].y)
+
+            # enemy tank goes beyond the corner of the screen
+            for enemy_number in range(len(enemies)):
+                if enemies[enemy_number].x > 144:
+                    enemies[enemy_number].move(144, enemies[enemy_number].y)
+                elif enemies[enemy_number].x < 0:
+                    enemies[enemy_number].move(0, enemies[enemy_number].y)
+                elif enemies[enemy_number].y < 0:
+                    enemies[enemy_number].move(enemies[enemy_number].x, 0)
+                elif enemies[enemy_number].y > 112:
+                    enemies[enemy_number].move(enemies[enemy_number].x, 112)
 
             # collision between tank and a brick wall
             for brick_wall_number in range(len(brick_walls)):
