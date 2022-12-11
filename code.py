@@ -2,64 +2,27 @@
 
 # Created by: Evgeny Vovk
 # Created on: 2022 Oct
-# This file is the storage of all scenes for Battle City on PyBadge.
+# This file is the splash/first scene for Battle City on PyBadge.
 
 import ugame
 import stage
-import constants
 import time
 import random
 import math
-DEBUG = 0
+
+import constants
+import functions
+
+DEBUG = constants.DEBUG
 
 def splash_scene():
     # this function is the main game game_scene
 
     # get sound ready
-    coin_sound = open("coin.wav", "rb")
-    sound = ugame.audio
-    sound.stop()
-    if DEBUG:
-        sound.mute(False)
-    sound.play(coin_sound)
+    functions.add_sound("coin.wav")
 
     image_bank_background = stage.Bank.from_bmp16("mt_game_studio.bmp")
-
-    background = stage.Grid(
-        image_bank_background,
-        constants.SCREEN_GRID_X,
-        constants.SCREEN_GRID_Y,
-    )
-
-    # used this program to split the image into tile:
-    # https://ezgif.com/sprite-cutter/ezgif-5-818cdbcc3f66.png
-    background.tile(2, 2, 0)  # blank white
-    background.tile(3, 2, 1)
-    background.tile(4, 2, 2)
-    background.tile(5, 2, 3)
-    background.tile(6, 2, 4)
-    background.tile(7, 2, 0)  # blank white
-
-    background.tile(2, 3, 0)  # blank white
-    background.tile(3, 3, 5)
-    background.tile(4, 3, 6)
-    background.tile(5, 3, 7)
-    background.tile(6, 3, 8)
-    background.tile(7, 3, 0)  # blank white
-
-    background.tile(2, 4, 0)  # blank white
-    background.tile(3, 4, 9)
-    background.tile(4, 4, 10)
-    background.tile(5, 4, 11)
-    background.tile(6, 4, 12)
-    background.tile(7, 4, 0)  # blank white
-
-    background.tile(2, 5, 0)  # blank white
-    background.tile(3, 5, 0)
-    background.tile(4, 5, 13)
-    background.tile(5, 5, 14)
-    background.tile(6, 5, 0)
-    background.tile(7, 5, 0)  # blank white
+    background = functions.get_background(image_bank_background)
 
     game = stage.Stage(ugame.display, constants.FPS)
     game.layers = [background]
@@ -74,142 +37,38 @@ def splash_scene():
             level_one_game_scene()
 
 def menu_scene():
-    # this function is the main game game_scene
-
-
     # used this program to split the image into tile:
     # https://ezgif.com/sprite-cutter/ezgif-5-818cdbcc3f66.png
 
-    position_of_tiles_x = 0
-    position_of_tiles_y = 0
-    tile = 0
     tiles = []
-    image_bank_background = stage.Bank.from_bmp16("menu_background_part_one.bmp")
-    while tile < 16:
-        a_single_tile = stage.Sprite(
-            image_bank_background,
-            tile,
-            position_of_tiles_x,
-            position_of_tiles_y,
-        )
-        position_of_tiles_x += 16
-        tile += 1
-        if position_of_tiles_x == 160:
-            position_of_tiles_y += 16
-            position_of_tiles_x = 0
-        tiles.append(a_single_tile)
-    tile = 0
+    tile_offset = 0
 
-    image_bank_background = stage.Bank.from_bmp16("menu_background_part_two.bmp")
-    while tile < 16:
-        a_single_tile = stage.Sprite(
-            image_bank_background,
-            tile,
-            position_of_tiles_x,
-            position_of_tiles_y,
-        )
-        position_of_tiles_x += 16
-        tile += 1
-        if position_of_tiles_x == 160:
-            position_of_tiles_y += 16
-            position_of_tiles_x = 0
-        tiles.append(a_single_tile)
-    tile = 0
+    image_bank_background1 = stage.Bank.from_bmp16("menu_background1.bmp")
+    image_bank_background2 = stage.Bank.from_bmp16("menu_background2.bmp")
+    image_bank_background3 = stage.Bank.from_bmp16("menu_background3.bmp")
+    image_bank_background4 = stage.Bank.from_bmp16("menu_background4.bmp")
+    image_bank_background5 = stage.Bank.from_bmp16("menu_background5.bmp")
 
-    image_bank_backgroundp3 = stage.Bank.from_bmp16("menu_background_part_three.bmp")
-    while tile < 16:
-        if tile == 10:
-            tile += 1
-            continue
-        elif tile == 11:
-            a_single_tile = stage.Sprite(
-            image_bank_backgroundp3,
-            tile,
-            position_of_tiles_x,
-            position_of_tiles_y,
-            )
-            position_of_tiles_x += 16
-            if position_of_tiles_x == 160:
-                position_of_tiles_y += 16
-                position_of_tiles_x = 0
-            tiles.append(a_single_tile)
-        a_single_tile = stage.Sprite(
-            image_bank_backgroundp3,
-            tile,
-            position_of_tiles_x,
-            position_of_tiles_y,
-        )
-        position_of_tiles_x += 16
-        tile += 1
-        if position_of_tiles_x == 160:
-            position_of_tiles_y += 16
-            position_of_tiles_x = 0
-        tiles.append(a_single_tile)
-    tile = 0
-
-    image_bank_background = stage.Bank.from_bmp16("menu_background_part_four.bmp")
-    while tile < 16:
-        a_single_tile = stage.Sprite(
-            image_bank_background,
-            tile,
-            position_of_tiles_x,
-            position_of_tiles_y,
-        )
-        position_of_tiles_x += 16
-        tile += 1
-        if position_of_tiles_x == 160:
-            position_of_tiles_y += 16
-            position_of_tiles_x = 0
-        tiles.append(a_single_tile)
-    tile = 0
-
-    image_bank_background = stage.Bank.from_bmp16("menu_background_part_five.bmp")
-    while tile < 16:
-        a_single_tile = stage.Sprite(
-            image_bank_background,
-            tile,
-            position_of_tiles_x,
-            position_of_tiles_y,
-        )
-        position_of_tiles_x += 16
-        tile += 1
-        if position_of_tiles_x == 160:
-            position_of_tiles_y += 16
-            position_of_tiles_x = 0
-        tiles.append(a_single_tile)
+    tile_offset = functions.fill_background(tiles, tile_offset, image_bank_background1, range(10, 16))
+    tile_offset = functions.fill_background(tiles, tile_offset, image_bank_background2)
+    tile_offset = functions.fill_background(tiles, tile_offset, image_bank_background3)
+    tile_offset = functions.fill_background(tiles, tile_offset, image_bank_background4)
+    tile_offset = functions.fill_background(tiles, tile_offset, image_bank_background5)
 
     tank = stage.Sprite(
-            image_bank_backgroundp3,
-            10,
-            30,
-            62,
-        )
-
-    text = []
-    text1 = stage.Text(
-        width=209, height=120, font=None, buffer=None
+        image_bank_background1,
+        1,
+        30,
+        63,
     )
-    text1.move(10, 10)
-    text1.text("High score:")
-    text.append(text1)
 
-    text2 = stage.Text(
-        width=29, height=12, font=None, buffer=None
-    )
-    text2.move(50, 69)
-    text2.text("Play")
-    text.append(text2)
-
-    text3 = stage.Text(
-        width=29, height=12, font=None, buffer=None
-    )
-    text3.move(50, 85)
-    text3.text("Controls")
-    text.append(text3)
-
+    display = []
+    functions.print_text(display, "High score:", 10, 10)
+    functions.print_text(display, "Play", 50, 70)
+    functions.print_text(display, "Controls", 50, 85)
 
     game = stage.Stage(ugame.display, constants.FPS)
-    game.layers = [tank] + text + tiles
+    game.layers = [tank] + display + tiles
     game.render_block()
 
     mode = 0
@@ -218,7 +77,7 @@ def menu_scene():
         keys = ugame.buttons.get_pressed()
 
         if keys & ugame.K_UP != 0:
-            tank.move(30, 62)
+            tank.move(30, 63)
             mode = 0
         if keys & ugame.K_DOWN != 0:
             tank.move(30, 78)
@@ -237,46 +96,16 @@ def controls_scene():
     pass
 
 def level_one_scene():
-    game_start = open("game_start.wav", "rb")
-    sound = ugame.audio
-    sound.stop()
-    sound.mute(False)
-    sound.play(game_start)
+    functions.add_sound("game_start.wav")
 
-    position_of_tiles_x = 80
-    position_of_tiles_y = 32
-    tile = 0
+    tile_offset = 25
     level_tiles = []
-    image_level_bank_background = stage.Bank.from_bmp16("level_one_backgroundp1.bmp")
-    while tile < 16:
-        a_single_tile = stage.Sprite(
-            image_level_bank_background,
-            tile,
-            position_of_tiles_x,
-            position_of_tiles_y,
-        )
-        position_of_tiles_x += 16
-        tile += 1
-        if position_of_tiles_x == 160:
-            position_of_tiles_y += 16
-            position_of_tiles_x = 0
-        level_tiles.append(a_single_tile)
-    tile = 0
 
-    image_level_bank_background = stage.Bank.from_bmp16("level_one_backgroundp2.bmp")
-    while tile < 16:
-        a_single_tile = stage.Sprite(
-            image_level_bank_background,
-            tile,
-            position_of_tiles_x,
-            position_of_tiles_y,
-        )
-        position_of_tiles_x += 16
-        tile += 1
-        if position_of_tiles_x == 160:
-            position_of_tiles_y += 16
-            position_of_tiles_x = 0
-        level_tiles.append(a_single_tile)
+    image_level_bank_background1 = stage.Bank.from_bmp16("level_one_background1.bmp")
+    image_level_bank_background2 = stage.Bank.from_bmp16("level_one_background2.bmp")
+
+    tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background1)
+    tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background2)
 
     game = stage.Stage(ugame.display, constants.FPS)
     game.layers = level_tiles
@@ -288,17 +117,10 @@ def level_one_scene():
         level_one_game_scene()
 
 def level_one_game_scene():
-    level_start = open("game_sound.wav", "rb")
-    sound = ugame.audio
-    sound.stop()
-    if DEBUG:
-        sound.mute(False)
-    sound.play(level_start, loop = True)
 
-    a_button = constants.button_state["button_up"]
-    b_button = constants.button_state["button_up"]
-    start_button = constants.button_state["button_up"]
-    select_button = constants.button_state["button_up"]
+    functions.add_sound("game_sound.wav", True)
+
+    a_button = b_button = start_button = select_button = constants.button_state["button_up"]
 
     image_bank_sprites = stage.Bank.from_bmp16("sprite_sheetp1.bmp")
     image_bank_sprites2 = stage.Bank.from_bmp16("sprite_sheetp2.bmp")
@@ -359,11 +181,6 @@ def level_one_game_scene():
 
     #start = int(time.monotonic())
     #last = -1
-    first_enemy_tank_direction = 0
-    second_enemy_tank_direction = 0
-    third_enemy_tank_direction = 0
-    fourth_enemy_tank_direction = 0
-    fifth_enemy_tank_direction = 0
     start = int(time.monotonic())
     next = random.randint(0,4)
     next2 = random.randint(1,4)
@@ -468,80 +285,28 @@ def level_one_game_scene():
                     enemy_tank_direction = random.randint(1,5)
                     if enemy_tank_direction == 1 or enemy_tank_direction == 2:
                         enemies[enemy_number].set_frame(0)
+                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y + 1)
                     elif enemy_tank_direction == 3:
                         enemies[enemy_number].set_frame(1)
+                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y - 1)
                     elif enemy_tank_direction == 4:
                         enemies[enemy_number].set_frame(2)
+                        enemies[enemy_number].move(enemies[enemy_number].x + 1, enemies[enemy_number].y)
                     elif enemy_tank_direction == 5:
                         enemies[enemy_number].set_frame(3)
-                    if enemy_number == 0:
-                        first_enemy_tank_direction = enemy_tank_direction
-                    elif enemy_number == 1:
-                        second_enemy_tank_direction = enemy_tank_direction
-                    elif enemy_number == 2:
-                        third_enemy_tank_direction = enemy_tank_direction
-                    elif enemy_number == 3:
-                        fourth_enemy_tank_direction = enemy_tank_direction
-                    elif enemy_number == 4:
-                        fifth_enemy_tank_direction = enemy_tank_direction
-
-            for enemy_number in range(len(enemies)):
-                if enemy_number == 0:
-                    if first_enemy_tank_direction == 1 or first_enemy_tank_direction == 2:
-                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y + 1)
-                    elif first_enemy_tank_direction == 3:
-                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y - 1)
-                    elif first_enemy_tank_direction == 4:
-                        enemies[enemy_number].move(enemies[enemy_number].x + 1, enemies[enemy_number].y)
-                    elif first_enemy_tank_direction == 5:
-                        enemies[enemy_number].move(enemies[enemy_number].x - 1, enemies[enemy_number].y)
-                elif enemy_number == 1:
-                    if second_enemy_tank_direction == 1 or second_enemy_tank_direction == 2:
-                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y + 1)
-                    elif second_enemy_tank_direction == 3:
-                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y - 1)
-                    elif second_enemy_tank_direction == 4:
-                        enemies[enemy_number].move(enemies[enemy_number].x + 1, enemies[enemy_number].y)
-                    elif second_enemy_tank_direction == 5:
-                        enemies[enemy_number].move(enemies[enemy_number].x - 1, enemies[enemy_number].y)
-                elif enemy_number == 2:
-                    if third_enemy_tank_direction == 1 or third_enemy_tank_direction == 2:
-                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y + 1)
-                    elif third_enemy_tank_direction == 3:
-                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y - 1)
-                    elif third_enemy_tank_direction == 4:
-                        enemies[enemy_number].move(enemies[enemy_number].x + 1, enemies[enemy_number].y)
-                    elif third_enemy_tank_direction == 5:
-                        enemies[enemy_number].move(enemies[enemy_number].x - 1, enemies[enemy_number].y)
-                elif enemy_number == 3:
-                    if fourth_enemy_tank_direction == 1 or fourth_enemy_tank_direction == 2:
-                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y + 1)
-                    elif fourth_enemy_tank_direction == 3:
-                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y - 1)
-                    elif fourth_enemy_tank_direction == 4:
-                        enemies[enemy_number].move(enemies[enemy_number].x + 1, enemies[enemy_number].y)
-                    elif fourth_enemy_tank_direction == 5:
-                        enemies[enemy_number].move(enemies[enemy_number].x - 1, enemies[enemy_number].y)
-                elif enemy_number == 4:
-                    if fifth_enemy_tank_direction == 1 or fifth_enemy_tank_direction == 2:
-                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y + 1)
-                    elif fifth_enemy_tank_direction == 3:
-                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y - 1)
-                    elif fifth_enemy_tank_direction == 4:
-                        enemies[enemy_number].move(enemies[enemy_number].x + 1, enemies[enemy_number].y)
-                    elif fifth_enemy_tank_direction == 5:
                         enemies[enemy_number].move(enemies[enemy_number].x - 1, enemies[enemy_number].y)
 
-            # enemy tank goes beyond the corner of the screen
+            # enemy tank goes oof screen
             for enemy_number in range(len(enemies)):
-                if enemies[enemy_number].x > 144:
-                    enemies[enemy_number].move(144, enemies[enemy_number].y)
-                elif enemies[enemy_number].x < 0:
-                    enemies[enemy_number].move(0, enemies[enemy_number].y)
-                elif enemies[enemy_number].y < 0:
-                    enemies[enemy_number].move(enemies[enemy_number].x, 0)
-                elif enemies[enemy_number].y > 112:
-                    enemies[enemy_number].move(enemies[enemy_number].x, 112)
+                if enemies[enemy_number].x > 0:
+                    if  enemies[enemy_number].x < 0:
+                        enemies[enemy_number].move(0, enemies[enemy_number].y)
+                    elif  enemies[enemy_number].x > 144:
+                        enemies[enemy_number].move(144, enemies[enemy_number].y)
+                    elif  enemies[enemy_number].y < 0:
+                        enemies[enemy_number].move(enemies[enemy_number].y, 0)
+                    elif  enemies[enemy_number].y > 112:
+                        enemies[enemy_number].move(enemies[enemy_number].y, 112)
 
             # collision between tank and a brick wall
             for brick_wall_number in range(len(brick_walls)):
