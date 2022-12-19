@@ -5,7 +5,7 @@
 # This constants file is for Space Alien game
 
 # PyBadge screen size is 160x128 and sprites are 16x16
-DEBUG = 0
+DEBUG = 1
 
 SCREEN_X = 160
 SCREEN_Y = 128

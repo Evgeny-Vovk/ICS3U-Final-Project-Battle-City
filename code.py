@@ -14,6 +14,8 @@ import constants
 import functions
 
 DEBUG = constants.DEBUG
+global_speed = 1
+
 
 def splash_scene():
     # this function is the main game game_scene
@@ -31,10 +33,10 @@ def splash_scene():
     while True:
         # Wait for 2 seconds
         time.sleep(2.0)
-        if DEBUG:
+        if not DEBUG:
             menu_scene()
         else:
-            level_one_game_scene()
+            level_one_game_scene_test()
 
 def menu_scene():
     # used this program to split the image into tile:
@@ -114,81 +116,38 @@ def level_one_scene():
     while True:
         # Wait for 4 seconds
         time.sleep(4.3)
-        level_one_game_scene()
+        level_one_game_scene_test()
 
 def level_one_game_scene():
 
-    functions.add_sound("game_sound.wav", True)
 
-    a_button = b_button = start_button = select_button = constants.button_state["button_up"]
-
-    image_bank_sprites = stage.Bank.from_bmp16("sprite_sheetp1.bmp")
-    image_bank_sprites2 = stage.Bank.from_bmp16("sprite_sheetp2.bmp")
-    bushes = []
-    bush_x = 48
-    while bush_x < 160:
-        bush = stage.Sprite(
-            image_bank_sprites,
-            5,
-            bush_x,
-            16,
-        )
-        bush_x += 16
-        bushes.append(bush)
-
-    brick_walls = []
-    brick_wall_x = 80
-    while brick_wall_x < 160:
-        brick_wall = stage.Sprite(
-            image_bank_sprites,
-            4,
-            brick_wall_x,
-            80,
-        )
-        brick_wall_x += 16
-        brick_walls.append(brick_wall)
-
-    tank = stage.Sprite(
-            image_bank_sprites,
-            8,
-            64,
-            112,
-        )
-
-    enemies = []
-    for enemy_number in range(constants.TOTAL_NUMBER_OF_ENEMIES):
-        an_enemy = stage.Sprite(
-            image_bank_sprites2,
-            0,
-            constants.OFF_SCREEN_X,
-            constants.OFF_SCREEN_Y,
-        )
-        enemies.append(an_enemy)
-
-    bullets = []
-    for bullet_number in range(constants.TOTAL_NUMBER_OF_LASERS):
-        a_bullet = stage.Sprite(
-            image_bank_sprites,
-            11,
-            constants.OFF_SCREEN_X,
-            constants.OFF_SCREEN_Y,
-        )
-        bullets.append(a_bullet)
-
-    game = stage.Stage(ugame.display, constants.FPS)
-    game.layers = bushes + brick_walls + [tank] + enemies + bullets
-    game.render_block()
-
-    #start = int(time.monotonic())
-    #last = -1
-    start = int(time.monotonic())
-    next = random.randint(0,4)
-    next2 = random.randint(1,4)
-    tank_direction = 1
-    enemy_tank_direction = 1
     while True:
         current = int(time.monotonic()) - start
         keys = ugame.buttons.get_pressed()
+
+        if keys:
+            if ugame.K_UP:
+                tank.update(frame, 0)
+                tank.move(tank.x, tank.y - 1)
+                tank.set_frame(8)
+                tank_direction = 1
+                if tank.y < 0:
+                    tank.move(tank.x, tank.y + 1)
+            if ugame.K_DOWN:
+                tank.move(tank.x, tank.y + 1)
+                tank.set_frame(7)
+                tank_direction = 2
+                if tank.y > 112:
+                    tank.move(tank.x,tank.y - 1)
+            elif ugame.K_LEFT:
+                tank.move(tank.x - 1, tank.y)
+                tank.set_frame(9)
+                tank_direction = 3
+                if tank.x < 0:
+                    tank.move(tank.x + 1,tank.y)
+
+
+
 
         if keys & ugame.K_X:
             pass
@@ -229,137 +188,281 @@ def level_one_game_scene():
         if keys & ugame.K_START != 0:
             pass
 
-        #if last < int(current / 4):
-        #    last = int(current / 4)
-        if current >= next:
-            random_number = random.randint(1,4)
-            next += random_number
-            for enemy_number in range(len(enemies)):
-                if enemies[enemy_number].x < 0:
-                    enemies[enemy_number].move(random.randint(0, 144), 0)
+#================================================
+
+image_bank_sprites1 = stage.Bank.from_bmp16("sprite_sheet1.bmp")
+image_bank_sprites2 = stage.Bank.from_bmp16("sprite_sheet2.bmp")
+
+
+
+
+class Tank(stage.Sprite):
+    def __init__(self, x, y, dx):
+        super().__init__(image_bank_sprites1, 8, x, y)
+        self.dx = dx
+        self.rotation = 0
+
+    def update(self, frame):
+        super().update()
+        if (frame == 7):
+            self.rotation = (self.rotation + 1) % 4
+            self.set_frame(None, self.rotation)
+
+        # if layer1.tile((self.x + 8) // 16, (self.y + 8) // 16) == 0:
+        #     self.kill()
+        # else:
+        #     sprite.set_frame(9, (frame // 4) * 4)
+        #     self.move(self.x + self.dx, self.y)
+
+    def kill(self):
+        self.dx = 0
+        self.set_frame(12)
+        # self.move(-16, -16)
+
+
+def get_delta(rotation, speed = 1):
+    if (rotation == 0):
+        dx, dy = 0, -speed
+    elif (rotation == 1):
+        dx, dy = speed, 0
+    elif (rotation == 2):
+        dx, dy = 0, speed
+    elif (rotation == 3):
+        dx, dy = -speed, 0
+    return dx, dy
+
+
+class TankLite(stage.Sprite):
+    def __init__(self, x, y, start_frame, speed = 1, rotation = 0):
+        super().__init__(image_bank_sprites2, 1, -16, -16, 0, rotation)
+        self.isActive = False
+        self.isAlive = False
+        self.speed = speed
+        self.rotation = rotation
+        self.start_x = x * 16
+        self.start_y = y * 16
+        self.start_frame = start_frame
+        self.lifes = 3
+        self.my_bullets = []
+        self.next_shoot = 0
+        self.next_move = 0
+        for i in range(2):
+            new_bullet = Bullet(2)
+            self.my_bullets.append(new_bullet)
+            bullets.append(new_bullet)
+
+    def update(self, frame):
+        super().update()
+        # Activate the tank at start frame
+        if not self.isActive and frame >= self.start_frame:
+            self.isActive = True
+            self.isAlive = True
+            self.move(self.start_x, self.start_y)
+
+        if self.isAlive:
+            global global_speed
+            if self.next_shoot < frame:
+                self.next_shoot = frame + random.randint(50, 100)
+            if self.next_move < frame:
+                self.next_move = frame + random.randint(150, 250)
+
+            # Evaluate collision with any objects
+            no_collision = True
+            for brick in bricks:
+                if stage.collide(self.x+1, self.y+1, self.x+15, self.y+15,
+                                brick.x+1, brick.y+1, brick.x+15, brick.y+15):
+                    no_collision = False
                     break
 
-        # bullet creation
-        if a_button == constants.button_state["button_just_pressed"]:
-            for bullet_number in range(len(bullets)):
-                if bullets[bullet_number].x < 0:
-                    bullets[bullet_number].move(tank.x, tank.y)
-                    bullet_direction = tank_direction
+            if no_collision:
+                delta_x, delta_y = get_delta(self.rotation, self.speed * global_speed)
+                self.move(self.x + delta_x, self.y + delta_y)
+
+            if self.next_shoot == frame:
+                for bullet in self.my_bullets:
+                    if not bullet.isAlive:
+                        bullet.activate(self.x, self.y, self.rotation)
+                        break
+
+
+            # Evaluate collision with boards
+            change_rotation = False
+            if self.y > 112 or self.x < 0 or self.x > 144 or self.y < 0:
+                change_rotation = True
+
+            if self.next_move == frame or change_rotation:
+                self.rotation = (self.rotation + random.randint(1, 3)) % 4
+                self.set_frame(None, self.rotation)
+
+
+    def kill(self):
+        self.move(-16, -16)
+        self.isAlive = False
+
+
+
+        # if (frame == 380):
+        #     my_tank[0].kill()
+
+
+        # if layer1.tile((self.x + 8) // 16, (self.y + 8) // 16) == 0:
+        #     self.kill()
+        # else:
+        #     sprite.set_frame(9, (frame // 4) * 4)
+        #     self.move(self.x + self.dx, self.y)
+
+    # def kill(self):
+    #     self.dx = 0
+    #     self.move(-16, -16)
+class Block(stage.Sprite):
+    def __init__(self, type, x, y):
+        if (type == "iron"):
+            i = 3
+        elif (type == "brick"):
+            i = 4
+        elif (type == "bush"):
+            i = 5
+        elif (type == "water"):
+            i = 6
+        super().__init__(image_bank_sprites1, i, x*16, y*16)
+        if (type == "wall"):
+            self.isAlive = True
+        else:
+            self.isAlive = False
+
+    def update(self, frame):
+        super().update()
+
+    def kill(self):
+        self.move(-16, -16)
+        self.isAlive = False
+
+
+class Bullet(stage.Sprite):
+    def __init__(self, speed = 1, strength = 1):
+        super().__init__(image_bank_sprites1, 11, -16, -16)
+        self.speed = speed
+        self.strength = strength
+        self.rotation = 1
+        self.isAlive = False
+
+    def update(self, frame):
+        super().update()
+
+        delta_x, delta_y = get_delta(self.rotation, self.speed)
+        if self.isAlive:
+            if self.y >= 112 or self.x <= 0 or self.x >= 144 or self.y <= 0:
+                self.kill()
+        if (self.isAlive):
+            # print(self.x, self.y)
+            if stage.collide(self.x, self.y, self.x+8+delta_x, self.y+8+delta_y,
+                        my_tank[0].x+1, my_tank[0].y+1, my_tank[0].x+15, my_tank[0].y+15):
+                my_tank[0].kill()
+                self.kill()
+        if (self.isAlive):
+            for brick in bricks:
+                if stage.collide(self.x, self.y, self.x+8+delta_x, self.y+8+delta_y,
+                            brick.x + 1, brick.y + 1, brick.x+15, brick.y+15):
+                    self.kill()
+                    brick.kill()
                     break
+        if (self.isAlive):
+            for iron in irons:
+                if stage.collide(self.x, self.y, self.x+8+delta_x, self.y+8+delta_y,
+                            iron.x + 1, iron.y + 1, iron.x+15, iron.y+15):
+                    self.kill()
+                    if self.strength >= 2:
+                        iron.kill()
+                    break
+        if (self.isAlive):
+            self.move(self.x + delta_x, self.y + delta_y)
 
-        # bullet direction and moving
-        for bullet_number in range(len(bullets)):
-            if bullets[bullet_number].x != constants.OFF_SCREEN_X:
-                if bullet_direction == 1:
-                    bullets[bullet_number].move(
-                        bullets[bullet_number].x,
-                        bullets[bullet_number].y - 2,
-                    )
-                elif bullet_direction == 2:
-                    bullets[bullet_number].move(
-                        bullets[bullet_number].x,
-                        bullets[bullet_number].y + 2,
-                    )
-                elif bullet_direction == 3:
-                    bullets[bullet_number].move(
-                        bullets[bullet_number].x - 2,
-                        bullets[bullet_number].y,
-                    )
-                elif bullet_direction == 4:
-                    bullets[bullet_number].move(
-                        bullets[bullet_number].x + 2,
-                        bullets[bullet_number].y,
-                    )
-            # move bullet to off screen if it gets past the screen corner
-            if bullets[bullet_number].y < -16 or bullets[bullet_number].y > 128 or bullets[bullet_number].x < -16 or bullets[bullet_number].x > 160:
-                    bullets[bullet_number].move(
-                        constants.OFF_SCREEN_X,
-                        constants.OFF_SCREEN_Y,
-                    )
+    def activate(self, x, y, rotation):
+        self.rotation = rotation
+        self.x = x
+        self.y = y
+        self.move(self.x, self.y)
+        self.set_frame(None, self.rotation)
+        self.isAlive = True
 
-            # make the enemy tanks choose random direction
-            if current >= next2:
-                random_number = random.randint(1,4)
-                next2 += random_number
-                for enemy_number in range(len(enemies)):
-                    enemy_tank_direction = random.randint(1,5)
-                    if enemy_tank_direction == 1 or enemy_tank_direction == 2:
-                        enemies[enemy_number].set_frame(0)
-                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y + 1)
-                    elif enemy_tank_direction == 3:
-                        enemies[enemy_number].set_frame(1)
-                        enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y - 1)
-                    elif enemy_tank_direction == 4:
-                        enemies[enemy_number].set_frame(2)
-                        enemies[enemy_number].move(enemies[enemy_number].x + 1, enemies[enemy_number].y)
-                    elif enemy_tank_direction == 5:
-                        enemies[enemy_number].set_frame(3)
-                        enemies[enemy_number].move(enemies[enemy_number].x - 1, enemies[enemy_number].y)
 
-            # enemy tank goes oof screen
-            for enemy_number in range(len(enemies)):
-                if enemies[enemy_number].x > 0:
-                    if  enemies[enemy_number].x < 0:
-                        enemies[enemy_number].move(0, enemies[enemy_number].y)
-                    elif  enemies[enemy_number].x > 144:
-                        enemies[enemy_number].move(144, enemies[enemy_number].y)
-                    elif  enemies[enemy_number].y < 0:
-                        enemies[enemy_number].move(enemies[enemy_number].y, 0)
-                    elif  enemies[enemy_number].y > 112:
-                        enemies[enemy_number].move(enemies[enemy_number].y, 112)
+        # if layer1.tile((self.x + 8) // 16, (self.y + 8) // 16) == 0:
+        #     self.kill()
+        # else:
+        #     sprite.set_frame(9, (frame // 4) * 4)
+        #     self.move(self.x + self.dx, self.y)
 
-            # collision between tank and a brick wall
-            for brick_wall_number in range(len(brick_walls)):
-                if brick_walls[brick_wall_number].x > 0:
-                    if tank.x > 0:
-                        if stage.collide(
-                            brick_walls[brick_wall_number].x + 2,
-                            brick_walls[brick_wall_number].y + 2,
-                            brick_walls[brick_wall_number].x + 15,
-                            brick_walls[brick_wall_number].y + 15,
-                            tank.x + 2,
-                            tank.y + 2,
-                            tank.x + 15,
-                            tank.y + 15,
-                        ): 
-                            if keys & ugame.K_DOWN != 0 or keys & ugame.K_UP != 0:
-                                if tank.y < brick_walls[brick_wall_number].y:
-                                    tank.move(tank.x, tank.y - 1)
-                                elif tank.y > brick_walls[brick_wall_number].y:
-                                    tank.move(tank.x, tank.y + 1)
-                            if keys & ugame.K_RIGHT != 0 or keys & ugame.K_LEFT != 0:
-                                if tank.x < brick_walls[brick_wall_number].x:
-                                    tank.move(tank.x - 1, tank.y)
-                                elif tank.x > brick_walls[brick_wall_number].x:
-                                    tank.move(tank.x + 1, tank.y)
+    def kill(self):
+        self.isAlive = False
+        self.move(-16, -16)
 
-            # collision between two enemy tanks
-            for enemy_number in range(len(enemies)):
-                if enemies[enemy_number].x > 0:
-                    for second_enemy_number in range(len(enemies)):
-                        if enemies[second_enemy_number].x > 0:
-                            if stage.collide(
-                                enemies[enemy_number].x + 2,
-                                enemies[enemy_number].y + 2,
-                                enemies[enemy_number].x + 15,
-                                enemies[enemy_number].y + 15,
-                                enemies[second_enemy_number].x + 2,
-                                enemies[second_enemy_number].y + 2,
-                                enemies[second_enemy_number].x + 15,
-                                enemies[second_enemy_number].y + 15,
-                            ):
-                                if enemies[enemy_number].y < enemies[second_enemy_number].y:
-                                    enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y - 1)
-                                elif enemies[enemy_number].y > enemies[second_enemy_number].y:
-                                    enemies[enemy_number].move(enemies[enemy_number].x, enemies[enemy_number].y + 1)
-                                if enemies[enemy_number].x < enemies[second_enemy_number].x:
-                                    enemies[enemy_number].move(enemies[enemy_number].x - 1, enemies[enemy_number].y)
-                                elif enemies[enemy_number].x > enemies[second_enemy_number].x:
-                                    enemies[enemy_number].move(enemies[enemy_number].x + 1, enemies[enemy_number].y)
+bullets = []
+my_tank = []
+tanks = []
+bricks = []
+irons = []
+bushes = []
+waters = []
 
-        # redraw Sprites
-        game.render_sprites([tank] + enemies + bullets)
+def level_one_game_scene_test():
+    functions.add_sound("game_sound.wav", True)
+
+    # a_button = b_button = start_button = select_button = constants.button_state["button_up"]
+
+    my_tank.append(Tank(16, 16, 0))
+    # hero = Hero(16, 16)
+    # sprites = [bolt, Sparky(104, 96), Sparky(64, 32), Sparky(16, 96),
+    #         Sparky(96, 16), hero]
+
+    tanks.append(TankLite(4, 0, 0, 1, 2))
+    tanks.append(TankLite(9, 0, 200, 1, 2))
+    tanks.append(TankLite(0, 0, 400, 1, 2))
+    tanks.append(TankLite(4, 0, 600, 1, 2))
+    # tanks.append(TankLite(4, 0, 800, 1, 2))
+    # tanks.append(TankLite(9, 0, 1000, 1, 2))
+    # tanks.append(TankLite(0, 0, 1200, 1, 2))
+    # tanks.append(TankLite(4, 0, 1400, 1, 2))
+    # tanks.append(TankLite(9, 0, 1600, 1, 2))
+
+    bricks.append(Block("brick", 1, 5))
+    bricks.append(Block("brick", 2, 5))
+    bricks.append(Block("brick", 3, 5))
+    bricks.append(Block("brick", 4, 5))
+    bricks.append(Block("brick", 5, 5))
+    bricks.append(Block("brick", 6, 5))
+    bricks.append(Block("brick", 1, 3))
+    bricks.append(Block("brick", 3, 3))
+    bricks.append(Block("brick", 4, 3))
+    bricks.append(Block("brick", 6, 3))
+    bushes.append(Block("bush", 3, 5))
+    waters.append(Block("water", 2, 5))
+    irons.append(Block("iron", 0, 5))
+
+    sprites = my_tank + tanks + bullets + bricks + bushes + waters + irons
+
+    # game.layers = [layer0] + sprites + [layer1]
+
+    game = stage.Stage(ugame.display, constants.FPS)
+    game.layers = sprites
+    game.render_block()
+    frame = 0
+
+    while True:
+        frame += 1
+        # print(len(bullets))
+        # for b in bullets:
+        #     print(b.isAlive)
+        # time.sleep(2)
+        for sprite in sprites:
+            sprite.update(frame)
+        game.render_sprites(sprites)
         game.tick()
+
+
+
+
+
+#================================================
 
 if __name__ == "__main__":
     splash_scene()

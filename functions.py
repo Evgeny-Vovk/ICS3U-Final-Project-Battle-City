@@ -40,7 +40,7 @@ def add_sound(loaded_audio, loop = False):
     sound = ugame.audio
     sound.stop()
     if DEBUG:
-        sound.mute(False)
+        sound.mute(True)
     sound.play(audio, loop = loop)
 
 def fill_background(tiles, tile_offset, loaded_image, tile_range = range(0, 16)):
