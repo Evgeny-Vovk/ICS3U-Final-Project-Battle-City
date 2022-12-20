@@ -118,78 +118,6 @@ def level_one_scene():
         time.sleep(4.3)
         level_one_game_scene_test()
 
-def level_one_game_scene():
-
-
-    while True:
-        current = int(time.monotonic()) - start
-        keys = ugame.buttons.get_pressed()
-
-        if keys:
-            if ugame.K_UP:
-                tank.update(frame, 0)
-                tank.move(tank.x, tank.y - 1)
-                tank.set_frame(8)
-                tank_direction = 1
-                if tank.y < 0:
-                    tank.move(tank.x, tank.y + 1)
-            if ugame.K_DOWN:
-                tank.move(tank.x, tank.y + 1)
-                tank.set_frame(7)
-                tank_direction = 2
-                if tank.y > 112:
-                    tank.move(tank.x,tank.y - 1)
-            elif ugame.K_LEFT:
-                tank.move(tank.x - 1, tank.y)
-                tank.set_frame(9)
-                tank_direction = 3
-                if tank.x < 0:
-                    tank.move(tank.x + 1,tank.y)
-
-
-
-
-        if keys & ugame.K_X:
-            pass
-        if keys & ugame.K_O != 0:
-            if a_button == constants.button_state["button_up"]:
-                a_button = constants.button_state["button_just_pressed"]
-            elif a_button == constants.button_state["button_just_pressed"]:
-                a_button = constants.button_state["button_still_pressed"]
-        else:
-            if a_button == constants.button_state["button_still_pressed"]:
-                a_button = constants.button_state["button_released"]
-            else:
-                a_button = constants.button_state["button_up"]
-        if keys & ugame.K_UP != 0:
-            tank.move(tank.x, tank.y - 1)
-            tank.set_frame(8)
-            tank_direction = 1
-            if tank.y < 0:
-                tank.move(tank.x, tank.y + 1)
-        if keys & ugame.K_DOWN != 0:
-            tank.move(tank.x, tank.y + 1)
-            tank.set_frame(7)
-            tank_direction = 2
-            if tank.y > 112:
-                tank.move(tank.x,tank.y - 1)
-        if keys & ugame.K_LEFT != 0:
-            tank.move(tank.x - 1, tank.y)
-            tank.set_frame(9)
-            tank_direction = 3
-            if tank.x < 0:
-                tank.move(tank.x + 1,tank.y)
-        if keys & ugame.K_RIGHT != 0:
-            tank.move(tank.x + 1, tank.y)
-            tank.set_frame(10)
-            tank_direction = 4
-            if tank.x > 144:
-                tank.move(tank.x - 1,tank.y)
-        if keys & ugame.K_START != 0:
-            pass
-
-#================================================
-
 image_bank_sprites1 = stage.Bank.from_bmp16("sprite_sheet1.bmp")
 image_bank_sprites2 = stage.Bank.from_bmp16("sprite_sheet2.bmp")
 
@@ -197,16 +125,112 @@ image_bank_sprites2 = stage.Bank.from_bmp16("sprite_sheet2.bmp")
 
 
 class Tank(stage.Sprite):
-    def __init__(self, x, y, dx):
-        super().__init__(image_bank_sprites1, 8, x, y)
-        self.dx = dx
+    def __init__(self, x, y):
+        super().__init__(image_bank_sprites1, 8, x * 16, y * 16)
+        self.isAlive = True
+        self.start_x = x * 16
+        self.start_y = y * 16
+        self.died_frame = 0
+        self.time = 0
+        self.my_bullets = []
         self.rotation = 0
+        self.speed = 1
+        self.bullet_mode = 0
+        # self.lifes = 3
+        self.lifes = 1
+        self.a_button = constants.button_state["button_up"]
+        new_bullet = Bullet(2)
+        self.my_bullets.append(new_bullet)
+        bullets.append(new_bullet)
 
     def update(self, frame):
         super().update()
-        if (frame == 7):
-            self.rotation = (self.rotation + 1) % 4
-            self.set_frame(None, self.rotation)
+        if not self.isAlive:
+            if not self.died_frame:
+                self.died_frame = frame + 50
+            elif self.died_frame == frame:
+                self.lifes -= 1
+                if self.lifes:
+                    self.died_frame = 0
+                    self.set_frame(8, 0)
+                    self.move(self.start_x, self.start_y)
+                    self.isAlive = True
+                else:
+                    self.move(-16, -16)
+                    self.time = frame + 100
+            elif self.time == frame:
+                bullets.clear()
+                my_tank.clear()
+                tanks.clear()
+                bricks.clear()
+                irons.clear()
+                bushes.clear()
+                waters.clear()
+                global tanks_in_game
+                tanks_in_game = 4
+                menu_scene()
+
+        else:
+            keys = ugame.buttons.get_pressed()
+
+            speed = 0
+            if keys & ugame.K_O:
+                if self.a_button == constants.button_state["button_up"]:
+                    self.a_button = constants.button_state["button_just_pressed"]
+                elif self.a_button == constants.button_state["button_just_pressed"]:
+                    self.a_button = constants.button_state["button_still_pressed"]
+            else:
+                if self.a_button == constants.button_state["button_still_pressed"]:
+                    self.a_button = constants.button_state["button_released"]
+                else:
+                    self.a_button = constants.button_state["button_up"]
+            if keys & ugame.K_UP != 0:
+                self.rotation = 0
+                speed = self.speed
+            if keys & ugame.K_RIGHT != 0:
+                self.rotation = 1
+                speed = self.speed
+            if keys & ugame.K_DOWN != 0:
+                self.rotation = 2
+                speed = self.speed
+            if keys & ugame.K_LEFT != 0:
+                self.rotation = 3
+                speed = self.speed
+            
+            if self.a_button == constants.button_state["button_just_pressed"]:
+                for bullet in self.my_bullets:
+                    if not bullet.isAlive:
+                        bullet.activate(self.x, self.y, self.rotation)
+                        break
+
+            for bullet in self.my_bullets:
+                if bullet.isAlive:
+                    for tank in tanks:
+                        if stage.collide(bullet.x+4, bullet.y+4,
+                                        bullet.x+8, bullet.y+8,
+                                        tank.x, tank.y,
+                                        tank.x+15, tank.y+15):
+                            bullet.kill()
+                            tank.kill()
+                            break
+
+            no_collision = True
+            for brick in bricks:
+                delta_x, delta_y = get_delta(self.rotation, self.speed * global_speed)
+                if stage.collide(self.x+delta_x, self.y+delta_y, self.x+15+delta_x, self.y+15+delta_y,
+                                brick.x, brick.y, brick.x+15, brick.y+15):
+                    no_collision = False
+                    break
+
+            if self.x+delta_x < 0 or self.x+delta_x > 144 or self.y+delta_y < 0 or self.y+delta_y > 112:
+                no_collision = False
+
+            if speed:
+                self.set_frame(None, self.rotation)
+                if no_collision:
+                    self.move(self.x + delta_x, self.y + delta_y)
+
+
 
         # if layer1.tile((self.x + 8) // 16, (self.y + 8) // 16) == 0:
         #     self.kill()
@@ -215,9 +239,8 @@ class Tank(stage.Sprite):
         #     self.move(self.x + self.dx, self.y)
 
     def kill(self):
-        self.dx = 0
         self.set_frame(12)
-        # self.move(-16, -16)
+        self.isAlive = False
 
 
 def get_delta(rotation, speed = 1):
@@ -256,6 +279,9 @@ class TankLite(stage.Sprite):
         # Activate the tank at start frame
         if not self.isActive and frame >= self.start_frame:
             self.isActive = True
+            global tanks_in_game, tanks_in_game_max
+            tanks_in_game += 1
+            tanks_in_game_max += 1
             self.isAlive = True
             self.move(self.start_x, self.start_y)
 
@@ -268,14 +294,16 @@ class TankLite(stage.Sprite):
 
             # Evaluate collision with any objects
             no_collision = True
+            delta_x, delta_y = get_delta(self.rotation, self.speed * global_speed)
             for brick in bricks:
-                if stage.collide(self.x+1, self.y+1, self.x+15, self.y+15,
-                                brick.x+1, brick.y+1, brick.x+15, brick.y+15):
+                if stage.collide(self.x+delta_x, self.y+delta_y,
+                                 self.x+delta_x+15, self.y+delta_y+15,
+                                 brick.x, brick.y,
+                                 brick.x+15, brick.y+15):
                     no_collision = False
                     break
 
             if no_collision:
-                delta_x, delta_y = get_delta(self.rotation, self.speed * global_speed)
                 self.move(self.x + delta_x, self.y + delta_y)
 
             if self.next_shoot == frame:
@@ -284,20 +312,30 @@ class TankLite(stage.Sprite):
                         bullet.activate(self.x, self.y, self.rotation)
                         break
 
+            for bullet in self.my_bullets:
+                if stage.collide(bullet.x+4, bullet.y+4,
+                                 bullet.x+delta_x+8, bullet.y+delta_y+8,
+                                 my_tank[0].x, my_tank[0].y,
+                                 my_tank[0].x+15, my_tank[0].y+15):
+                    bullet.kill()
+                    my_tank[0].kill()
+                    break
 
             # Evaluate collision with boards
             change_rotation = False
             if self.y > 112 or self.x < 0 or self.x > 144 or self.y < 0:
-                change_rotation = True
-
-            if self.next_move == frame or change_rotation:
-                self.rotation = (self.rotation + random.randint(1, 3)) % 4
+                self.rotation = (self.rotation + 2) % 4
                 self.set_frame(None, self.rotation)
 
+            if self.next_move == frame:
+                self.rotation = random.randint(0, 3)
+                self.set_frame(None, self.rotation)
 
     def kill(self):
         self.move(-16, -16)
         self.isAlive = False
+        global tanks_in_game
+        tanks_in_game -= 1
 
 
 
@@ -351,25 +389,19 @@ class Bullet(stage.Sprite):
 
         delta_x, delta_y = get_delta(self.rotation, self.speed)
         if self.isAlive:
-            if self.y >= 112 or self.x <= 0 or self.x >= 144 or self.y <= 0:
-                self.kill()
-        if (self.isAlive):
-            # print(self.x, self.y)
-            if stage.collide(self.x, self.y, self.x+8+delta_x, self.y+8+delta_y,
-                        my_tank[0].x+1, my_tank[0].y+1, my_tank[0].x+15, my_tank[0].y+15):
-                my_tank[0].kill()
+            if self.y > 112 or self.x < 0 or self.x > 144 or self.y < 0:
                 self.kill()
         if (self.isAlive):
             for brick in bricks:
-                if stage.collide(self.x, self.y, self.x+8+delta_x, self.y+8+delta_y,
-                            brick.x + 1, brick.y + 1, brick.x+15, brick.y+15):
+                if stage.collide(self.x+4, self.y+4, self.x+8+delta_x, self.y+8+delta_y,
+                            brick.x, brick.y, brick.x+15, brick.y+15):
                     self.kill()
                     brick.kill()
                     break
         if (self.isAlive):
             for iron in irons:
-                if stage.collide(self.x, self.y, self.x+8+delta_x, self.y+8+delta_y,
-                            iron.x + 1, iron.y + 1, iron.x+15, iron.y+15):
+                if stage.collide(self.x+4, self.y+4, self.x+8+delta_x, self.y+8+delta_y,
+                            iron.x, iron.y, iron.x+15, iron.y+15):
                     self.kill()
                     if self.strength >= 2:
                         iron.kill()
@@ -403,13 +435,20 @@ bricks = []
 irons = []
 bushes = []
 waters = []
+tanks_in_game = 0
+tanks_in_game_max = 0
 
 def level_one_game_scene_test():
     functions.add_sound("game_sound.wav", True)
+    tanks_lifes = 25
+    global tanks_in_game
+    # print(len(bullets))
+    # time.sleep(2)
 
     # a_button = b_button = start_button = select_button = constants.button_state["button_up"]
 
-    my_tank.append(Tank(16, 16, 0))
+    my_tank.append(Tank(4, 7))
+
     # hero = Hero(16, 16)
     # sprites = [bolt, Sparky(104, 96), Sparky(64, 32), Sparky(16, 96),
     #         Sparky(96, 16), hero]
@@ -424,6 +463,8 @@ def level_one_game_scene_test():
     # tanks.append(TankLite(4, 0, 1400, 1, 2))
     # tanks.append(TankLite(9, 0, 1600, 1, 2))
 
+    bricks.append(Block("brick", 3, 1))
+    bricks.append(Block("brick", 5, 1))
     bricks.append(Block("brick", 1, 5))
     bricks.append(Block("brick", 2, 5))
     bricks.append(Block("brick", 3, 5))
@@ -447,7 +488,21 @@ def level_one_game_scene_test():
     game.render_block()
     frame = 0
 
+    # coll = stage.collide(48, 17,
+    #                     48 + 15, 17 +15,
+    #                     48, 32, 48+15, 32+15)
+
+    # print(coll)
+    # time.sleep(2)
+
     while True:
+        # if tanks_in_game < tanks_in_game_max:
+        #     if tanks_lifes > 0:
+        #         for tank in tanks:
+        #             if not tank.isAlive:
+        #                 tank.move(20,20)
+        #                 tanks_in_game += 1
+        #                 tanks_lifes -= 1
         frame += 1
         # print(len(bullets))
         # for b in bullets:
