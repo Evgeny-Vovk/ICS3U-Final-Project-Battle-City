@@ -63,3 +63,14 @@ def print_text(display, text, x_pos, y_pos):
     t_obj.move(x_pos, y_pos)
     t_obj.text(text)
     display.append(t_obj)
+
+def get_delta(rotation, speed = 1):
+    if (rotation == 0):
+        dx, dy = 0, -speed
+    elif (rotation == 1):
+        dx, dy = speed, 0
+    elif (rotation == 2):
+        dx, dy = 0, speed
+    elif (rotation == 3):
+        dx, dy = -speed, 0
+    return dx, dy
