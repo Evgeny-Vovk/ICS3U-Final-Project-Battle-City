@@ -15,6 +15,16 @@ import functions
 
 DEBUG = constants.DEBUG
 global_speed = 1
+image_bank_sprites = stage.Bank.from_bmp16("sprite_sheet.bmp")
+bullets = []
+my_tank = []
+tanks = []
+irons = []
+bricks = []
+bushes = []
+waters = []
+base = []
+enemy_lifes = 15
 
 
 def splash_scene():
@@ -36,7 +46,7 @@ def splash_scene():
         if not DEBUG:
             menu_scene()
         else:
-            level_one_game_scene_test()
+            level_one_game_scene()
 
 def menu_scene():
     # used this program to split the image into tile:
@@ -116,10 +126,145 @@ def level_one_scene():
     while True:
         # Wait for 4 seconds
         time.sleep(4.3)
-        level_one_game_scene_test()
+        level_one_game_scene()
 
-image_bank_sprites = stage.Bank.from_bmp16("sprite_sheet.bmp")
+def level_one_game_scene():
+    functions.add_sound("game_sound.wav", True)
 
+    my_tank.append(Tank(3, 7))
+    tanks.append(EnemyTank(4, 0, 0, 2))
+    tanks.append(EnemyTank(9, 0, 50, 2))
+    tanks.append(EnemyTank(0, 0, 100, 2))
+    tanks.append(EnemyTank(4, 0, 150, 2))
+    tanks.append(EnemyTank(9, 0, 300, 2))
+    tanks.append(EnemyTank(0, 0, 400, 2, constants.ENEMY_TANK2))
+    tanks.append(EnemyTank(4, 0, 500, 2))
+    tanks.append(EnemyTank(9, 0, 600, 2))
+    tanks.append(EnemyTank(0, 0, 700, 2))
+    tanks.append(EnemyTank(4, 0, 800, 2))
+    tanks.append(EnemyTank(9, 0, 900, 2))
+    tanks.append(EnemyTank(0, 0, 1000, 2, constants.ENEMY_TANK4))
+    tanks.append(EnemyTank(4, 0, 1100, 2))
+    tanks.append(EnemyTank(9, 0, 1200, 2))
+    tanks.append(EnemyTank(0, 0, 1300, 2, constants.ENEMY_TANK3))
+
+    irons.append(Block(constants.BLOCK_IRON, 0, 6))
+    irons.append(Block(constants.BLOCK_IRON, 1, 6))
+    irons.append(Block(constants.BLOCK_IRON, 8, 6))
+    irons.append(Block(constants.BLOCK_IRON, 9, 6))
+    bricks.append(Block(constants.BLOCK_BRICK, 0, 1))
+    bricks.append(Block(constants.BLOCK_BRICK, 9, 1))
+    bricks.append(Block(constants.BLOCK_BRICK, 1, 1))
+    bricks.append(Block(constants.BLOCK_BRICK, 2, 3))
+    bricks.append(Block(constants.BLOCK_BRICK, 2, 4))
+    bricks.append(Block(constants.BLOCK_BRICK, 7, 3))
+    bricks.append(Block(constants.BLOCK_BRICK, 7, 4))
+    bricks.append(Block(constants.BLOCK_BRICK, 8, 5))
+    bricks.append(Block(constants.BLOCK_BRICK, 1, 5))
+    bricks.append(Block(constants.BLOCK_BRICK, 1, 2))
+    bricks.append(Block(constants.BLOCK_BRICK, 8, 2))
+    bricks.append(Block(constants.BLOCK_BRICK, 3, 1))
+    bricks.append(Block(constants.BLOCK_BRICK, 4, 1))
+    bricks.append(Block(constants.BLOCK_BRICK, 5, 1))
+    bricks.append(Block(constants.BLOCK_BRICK, 6, 1))
+    bricks.append(Block(constants.BLOCK_BRICK, 8, 1))
+    bricks.append(Block(constants.BLOCK_BRICK, 4, 7))
+    bricks.append(Block(constants.BLOCK_BRICK, 4, 6))
+    bricks.append(Block(constants.BLOCK_BRICK, 5, 6))
+    bricks.append(Block(constants.BLOCK_BRICK, 6, 6))
+    bricks.append(Block(constants.BLOCK_BRICK, 6, 7))
+    bushes.append(Block(constants.BLOCK_BUSH, 3, 2))
+    bushes.append(Block(constants.BLOCK_BUSH, 4, 2))
+    bushes.append(Block(constants.BLOCK_BUSH, 5, 2))
+    bushes.append(Block(constants.BLOCK_BUSH, 6, 2))
+    bushes.append(Block(constants.BLOCK_BUSH, 3, 3))
+    bushes.append(Block(constants.BLOCK_BUSH, 3, 4))
+    bushes.append(Block(constants.BLOCK_BUSH, 3, 5))
+    bushes.append(Block(constants.BLOCK_BUSH, 4, 5))
+    bushes.append(Block(constants.BLOCK_BUSH, 5, 5))
+    bushes.append(Block(constants.BLOCK_BUSH, 6, 5))
+    bushes.append(Block(constants.BLOCK_BUSH, 6, 4))
+    bushes.append(Block(constants.BLOCK_BUSH, 6, 3))
+    waters.append(Block(constants.BLOCK_WATER, 5, 3))
+    waters.append(Block(constants.BLOCK_WATER, 4, 3))
+    waters.append(Block(constants.BLOCK_WATER, 5, 4))
+    waters.append(Block(constants.BLOCK_WATER, 4, 4))
+    base.append(Base(constants.BASE, 5, 7))
+
+    sprites = base + my_tank + tanks + bullets
+
+    game = stage.Stage(ugame.display, constants.FPS)
+    game.layers = irons + bushes + bricks + sprites + waters
+    game.render_block()
+    frame = 0
+
+    while True:
+        frame += 1
+        for sprite in sprites:
+            sprite.update(frame)
+        game.render_sprites(sprites)
+        # game.tick()
+
+def level_two_scene():
+    bullets.clear()
+    my_tank.clear()
+    tanks.clear()
+    irons.clear()
+    bricks.clear()
+    bushes.clear()
+    waters.clear()
+    base.clear()
+    functions.add_sound("game_start.wav")
+
+    tile_offset = 24
+    level_tiles = []
+
+    image_level_bank_background1 = stage.Bank.from_bmp16("level_two_background1.bmp")
+    image_level_bank_background2 = stage.Bank.from_bmp16("level_two_background2.bmp")
+
+    tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background1)
+    tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background2)
+
+    game = stage.Stage(ugame.display, constants.FPS)
+    game.layers = level_tiles
+    game.render_block()
+
+    while True:
+        # Wait for 4 seconds
+        time.sleep(4.3)
+        level_two_game_scene()
+
+def level_two_game_scene():
+    pass
+
+def lost():
+    bullets.clear()
+    my_tank.clear()
+    tanks.clear()
+    irons.clear()
+    bricks.clear()
+    bushes.clear()
+    waters.clear()
+    base.clear()
+    functions.add_sound("game_start.wav")
+
+    tile_offset = 20
+    level_tiles = []
+
+    image_level_bank_background1 = stage.Bank.from_bmp16("lose_background1.bmp")
+    image_level_bank_background2 = stage.Bank.from_bmp16("lose_background2.bmp")
+
+    tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background1)
+    tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background2)
+
+    game = stage.Stage(ugame.display, constants.FPS)
+    game.layers = level_tiles
+    game.render_block()
+
+    while True:
+        # Wait for 4 seconds
+        time.sleep(4.3)
+        menu_scene()
 
 class Tank(stage.Sprite):
     def __init__(self, x, y):
@@ -134,7 +279,7 @@ class Tank(stage.Sprite):
         self.speed = 1
         self.lifes = 3
         self.a_button = constants.button_state["button_up"]
-        new_bullet = Bullet(2)
+        new_bullet = Bullet(2, 1, False)
         self.my_bullets.append(new_bullet)
         bullets.append(new_bullet)
 
@@ -154,16 +299,7 @@ class Tank(stage.Sprite):
                     self.move(-16, -16)
                     self.time = frame + 100
             elif self.time == frame:
-                bullets.clear()
-                my_tank.clear()
-                tanks.clear()
-                irons.clear()
-                bricks.clear()
-                bushes.clear()
-                waters.clear()
-                global tanks_in_game
-                tanks_in_game = 4
-                menu_scene()
+                lost()
 
         else:
             keys = ugame.buttons.get_pressed()
@@ -198,19 +334,8 @@ class Tank(stage.Sprite):
                         bullet.activate(self.x, self.y, self.rotation)
                         break
 
-            for bullet in self.my_bullets:
-                if bullet.isAlive:
-                    for tank in tanks:
-                        if stage.collide(bullet.x+4, bullet.y+4,
-                                        bullet.x+8, bullet.y+8,
-                                        tank.x, tank.y,
-                                        tank.x+15, tank.y+15):
-                            bullet.kill()
-                            tank.kill()
-                            break
-
             no_collision = True
-            for block in irons + bricks + waters:
+            for block in irons + bricks + waters + base:
                 delta_x, delta_y = functions.get_delta(self.rotation, self.speed * global_speed)
                 if stage.collide(self.x+delta_x, self.y+delta_y, self.x+15+delta_x, self.y+15+delta_y,
                                 block.x, block.y, block.x+15, block.y+15):
@@ -237,33 +362,42 @@ class Tank(stage.Sprite):
         self.isAlive = False
 
 
-class TankLite(stage.Sprite):
-    def __init__(self, x, y, start_frame, speed = 1, rotation = 0):
-        super().__init__(image_bank_sprites, constants.ENEMY_TANK, -16, -16, 0, rotation)
+class EnemyTank(stage.Sprite):
+    def __init__(self, x, y, start_frame, rotation = 0, tank_type = constants.ENEMY_TANK):
+        super().__init__(image_bank_sprites, tank_type, -16, -16, 0, rotation)
         self.isActive = False
         self.isAlive = False
-        self.speed = speed
         self.rotation = rotation
         self.start_x = x * 16
         self.start_y = y * 16
         self.start_frame = start_frame
-        self.lifes = 3
-        self.my_bullets = []
         self.next_shoot = 0
         self.next_move = 0
-        for i in range(2):
-            new_bullet = Bullet(2)
-            self.my_bullets.append(new_bullet)
-            bullets.append(new_bullet)
+
+        self.speed = 1
+        self.lifes = 0
+        self.bullet_speed = 1
+        self.strength = 1
+        self.tank_type = tank_type
+
+        if self.tank_type == constants.ENEMY_TANK2:
+            self.strength = 2
+            self.bullet_speed = 4
+        elif self.tank_type == constants.ENEMY_TANK3:
+            self.speed = 2
+            self.bullet_speed = 2
+        elif self.tank_type == constants.ENEMY_TANK4:
+            self.lifes = 2
+            self.bullet_speed = 2
+
+        self.my_bullet = Bullet(self.bullet_speed, self.strength)
+        bullets.append(self.my_bullet)
 
     def update(self, frame):
         super().update()
         # Activate the tank at start frame
         if not self.isActive and frame >= self.start_frame:
             self.isActive = True
-            global tanks_in_game, tanks_in_game_max
-            tanks_in_game += 1
-            tanks_in_game_max += 1
             self.isAlive = True
             self.move(self.start_x, self.start_y)
 
@@ -278,7 +412,7 @@ class TankLite(stage.Sprite):
             no_collision = True
             delta_x, delta_y = functions.get_delta(self.rotation, self.speed * global_speed)
 
-            for block in irons + bricks + waters:
+            for block in irons + bricks + waters + base:
                 if block.x != -16:
                     if stage.collide(self.x+delta_x, self.y+delta_y,
                                     self.x+delta_x+15, self.y+delta_y+15,
@@ -287,52 +421,47 @@ class TankLite(stage.Sprite):
                         no_collision = False
                         break
 
-            if stage.collide(self.x+delta_x, self.y+delta_y,
+            if no_collision and stage.collide(self.x+delta_x, self.y+delta_y,
                             self.x+delta_x+15, self.y+delta_y+15,
                             my_tank[0].x, my_tank[0].y,
                             my_tank[0].x+15, my_tank[0].y+15):
                 no_collision = False
 
-            for tank in tanks:
-                if self != tank:
-                    if stage.collide(self.x+delta_x, self.y+delta_y,
-                                    self.x+delta_x+15, self.y+delta_y+15,
-                                    tank.x, tank.y,
-                                    tank.x+15, tank.y+15):
-                        no_collision = False
+            if no_collision:
+                for tank in tanks:
+                    if self != tank and tank.isAlive:
+                        if stage.collide(self.x+delta_x, self.y+delta_y,
+                                        self.x+delta_x+15, self.y+delta_y+15,
+                                        tank.x, tank.y,
+                                        tank.x+15, tank.y+15):
+                            no_collision = False
+                            break
 
             if no_collision:
                 self.move(self.x + delta_x, self.y + delta_y)
 
-            if self.next_shoot == frame:
-                for bullet in self.my_bullets:
-                    if not bullet.isAlive:
-                        bullet.activate(self.x, self.y, self.rotation)
-                        break
-
-            for bullet in self.my_bullets:
-                if stage.collide(bullet.x+4, bullet.y+4,
-                                 bullet.x+delta_x+8, bullet.y+delta_y+8,
-                                 my_tank[0].x, my_tank[0].y,
-                                 my_tank[0].x+15, my_tank[0].y+15):
-                    bullet.kill()
-                    my_tank[0].kill()
-                    break
+            if self.next_shoot == frame and not self.my_bullet.isAlive:
+                self.my_bullet.activate(self.x, self.y, self.rotation)
 
             # Evaluate collision with boards
             if self.y > 112 or self.x < 0 or self.x > 144 or self.y < 0:
                 self.rotation = (self.rotation + 2) % 4
                 self.set_frame(None, self.rotation)
-
-            if self.next_move == frame:
+            elif self.next_move == frame:
                 self.rotation = random.randint(0, 3)
                 self.set_frame(None, self.rotation)
 
     def kill(self):
-        self.move(-16, -16)
-        self.isAlive = False
-        global tanks_in_game
-        tanks_in_game -= 1
+        global enemy_lifes
+        if self.lifes == 0:
+            self.move(-16, -16)
+            self.isAlive = False
+            enemy_lifes -= 1
+        else:
+            self.lifes -= 1
+        if enemy_lifes == 0:
+            time.sleep(3)
+            level_two_scene()
 
 class Block(stage.Sprite):
     def __init__(self, type, x, y):
@@ -343,14 +472,31 @@ class Block(stage.Sprite):
         if self.armor <= strength:
             self.move(-16, -16)
 
+class Base(stage.Sprite):
+    def __init__(self, type, x, y):
+        super().__init__(image_bank_sprites, type, x*16, y*16)
+        self.type = type
+        self.isAlive = True
+        self.time_t = 0
+
+    def update(self, frame):
+        super().update()
+        if not self.isAlive:
+            time.sleep(3)
+            lost()
+
+    def kill(self):
+        self.set_frame(15)
+        self.isAlive = False
 
 class Bullet(stage.Sprite):
-    def __init__(self, speed = 1, strength = 1):
+    def __init__(self, speed = 1, strength = 1, isEnemy = True):
         super().__init__(image_bank_sprites, constants.BULLET, -16, -16)
         self.speed = speed
         self.strength = strength
         self.rotation = 1
         self.isAlive = False
+        self.isEnemy = isEnemy
 
     def update(self, frame):
         super().update()
@@ -368,6 +514,30 @@ class Bullet(stage.Sprite):
                     block.kill(self.strength)
                     break
 
+        if (self.isAlive):
+            if stage.collide(self.x+4, self.y+4, self.x+8+delta_x, self.y+8+delta_y,
+                        base[0].x, base[0].y, base[0].x+15, base[0].y+15):
+                self.kill()
+                base[0].kill()
+
+        if self.isAlive:
+            if self.isEnemy:
+                if stage.collide(self.x+4, self.y+4,
+                                    self.x+delta_x+8, self.y+delta_y+8,
+                                    my_tank[0].x, my_tank[0].y,
+                                    my_tank[0].x+15, my_tank[0].y+15):
+                    self.kill()
+                    my_tank[0].kill()
+            else:
+                for tank in tanks:
+                    if tank.isAlive:
+                        if stage.collide(self.x+4, self.y+4,
+                                        self.x+8, self.y+8,
+                                        tank.x, tank.y,
+                                        tank.x+15, tank.y+15):
+                            self.kill()
+                            tank.kill()
+                            break
 
         if (self.isAlive):
             for bullet in bullets:
@@ -392,91 +562,6 @@ class Bullet(stage.Sprite):
     def kill(self):
         self.isAlive = False
         self.move(-16, -16)
-
-bullets = []
-my_tank = []
-tanks = []
-irons = []
-bricks = []
-bushes = []
-waters = []
-tanks_in_game = 0
-tanks_in_game_max = 0
-
-def level_one_game_scene_test():
-    functions.add_sound("game_sound.wav", True)
-    tanks_lifes = 25
-    global tanks_in_game
-
-    my_tank.append(Tank(4, 7))
-
-    tanks.append(TankLite(4, 0, 0, 1, 2))
-    tanks.append(TankLite(9, 0, 200, 1, 2))
-    tanks.append(TankLite(0, 0, 400, 1, 2))
-    tanks.append(TankLite(4, 0, 600, 1, 2))
-    # tanks.append(TankLite(4, 0, 800, 1, 2))
-    # tanks.append(TankLite(9, 0, 1000, 1, 2))
-    # tanks.append(TankLite(0, 0, 1200, 1, 2))
-    # tanks.append(TankLite(4, 0, 1400, 1, 2))
-    # tanks.append(TankLite(9, 0, 1600, 1, 2))
-
-    irons.append(Block(constants.BLOCK_IRON, 0, 1))
-    irons.append(Block(constants.BLOCK_IRON, 9, 1))
-    irons.append(Block(constants.BLOCK_IRON, 0, 6))
-    irons.append(Block(constants.BLOCK_IRON, 1, 6))
-    irons.append(Block(constants.BLOCK_IRON, 8, 6))
-    irons.append(Block(constants.BLOCK_IRON, 9, 6))
-    bricks.append(Block(constants.BLOCK_BRICK, 1, 1))
-    bricks.append(Block(constants.BLOCK_BRICK, 2, 1))
-    bricks.append(Block(constants.BLOCK_BRICK, 3, 1))
-    bricks.append(Block(constants.BLOCK_BRICK, 4, 1))
-    bricks.append(Block(constants.BLOCK_BRICK, 5, 1))
-    bricks.append(Block(constants.BLOCK_BRICK, 6, 1))
-    bricks.append(Block(constants.BLOCK_BRICK, 7, 1))
-    bricks.append(Block(constants.BLOCK_BRICK, 8, 1))
-    bushes.append(Block(constants.BLOCK_BUSH, 3, 2))
-    bushes.append(Block(constants.BLOCK_BUSH, 4, 2))
-    bushes.append(Block(constants.BLOCK_BUSH, 5, 2))
-    bushes.append(Block(constants.BLOCK_BUSH, 6, 2))
-    bushes.append(Block(constants.BLOCK_BUSH, 3, 3))
-    bushes.append(Block(constants.BLOCK_BUSH, 3, 4))
-    bushes.append(Block(constants.BLOCK_BUSH, 3, 5))
-    bushes.append(Block(constants.BLOCK_BUSH, 4, 5))
-    bushes.append(Block(constants.BLOCK_BUSH, 5, 5))
-    bushes.append(Block(constants.BLOCK_BUSH, 6, 5))
-    bushes.append(Block(constants.BLOCK_BUSH, 6, 4))
-    bushes.append(Block(constants.BLOCK_BUSH, 6, 3))
-    waters.append(Block(constants.BLOCK_WATER, 5, 3))
-    waters.append(Block(constants.BLOCK_WATER, 4, 3))
-    waters.append(Block(constants.BLOCK_WATER, 5, 4))
-    waters.append(Block(constants.BLOCK_WATER, 4, 4))
-
-    sprites = my_tank + tanks + bullets
-
-    game = stage.Stage(ugame.display, constants.FPS)
-    game.layers = irons + bricks + bushes + waters + sprites
-    game.render_block()
-    frame = 0
-
-    while True:
-        # if tanks_in_game < tanks_in_game_max:
-        #     if tanks_lifes > 0:
-        #         for tank in tanks:
-        #             if not tank.isAlive:
-        #                 tank.move(20,20)
-        #                 tanks_in_game += 1
-        #                 tanks_lifes -= 1
-        frame += 1
-        for sprite in sprites:
-            sprite.update(frame)
-        game.render_sprites(sprites)
-        # game.tick()
-
-
-
-
-
-#================================================
 
 if __name__ == "__main__":
     splash_scene()
