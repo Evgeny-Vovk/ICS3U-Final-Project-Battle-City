@@ -347,6 +347,8 @@ def display_level_name(image1, image2):
     time.sleep(4.3)
 
 def load_level_map(level):
+    global my_tank
+    global enemy_lifes
     my_tank = (Tank(3, 7))
     base.append(Base(5, 7, constants.BASE))
     for item in level:
@@ -510,6 +512,7 @@ def main_scene():
                     status = game_scene(level)
                 else:
                     lost()
+                    break
         elif mode == 1:
             controls_scene()
 
