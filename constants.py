@@ -5,7 +5,7 @@
 # This constants file is for Space Alien game
 
 # PyBadge screen size is 160x128 and sprites are 16x16
-DEBUG = 1
+DEBUG = 0
 
 
 BLOCK_IRON  = 3
@@ -13,7 +13,7 @@ BLOCK_BRICK = 4
 BLOCK_BUSH  = 5
 BLOCK_WATER = 6
 MY_TANK     = 7
-ENEMY_TANK  = 8
+ENEMY_TANK1 = 8
 ENEMY_TANK2 = 9
 ENEMY_TANK3 = 10
 ENEMY_TANK4 = 11
@@ -59,3 +59,100 @@ BLUE_PALETTE = (
     b"\xff\xff\x00\x22\xcey\x22\xff\xff\xff\xff\xff\xff\xff\xff\xff"
     b"\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff"
 )
+
+level1_map = [
+        [4, 0, ENEMY_TANK1],
+        [9, 0, ENEMY_TANK1],
+        [0, 0, ENEMY_TANK1],
+        [4, 0, ENEMY_TANK1],
+        [9, 0, ENEMY_TANK1],
+        [0, 0, ENEMY_TANK2],
+        [4, 0, ENEMY_TANK1],
+        [9, 0, ENEMY_TANK1],
+        [0, 0, ENEMY_TANK1],
+        [4, 0, ENEMY_TANK1],
+        [9, 0, ENEMY_TANK1],
+        [0, 0, ENEMY_TANK4],
+        [4, 0, ENEMY_TANK1],
+        [9, 0, ENEMY_TANK1],
+        [0, 0, ENEMY_TANK3],
+        [0, 6, BLOCK_IRON],
+        [1, 6, BLOCK_IRON],
+        [8, 6, BLOCK_IRON],
+        [9, 6, BLOCK_IRON],
+        [0, 1, BLOCK_BRICK],
+        [9, 1, BLOCK_BRICK],
+        [1, 1, BLOCK_BRICK],
+        [2, 3, BLOCK_BRICK],
+        [2, 4, BLOCK_BRICK],
+        [7, 3, BLOCK_BRICK],
+        [7, 4, BLOCK_BRICK],
+        [8, 5, BLOCK_BRICK],
+        [1, 5, BLOCK_BRICK],
+        [1, 2, BLOCK_BRICK],
+        [8, 2, BLOCK_BRICK],
+        [3, 1, BLOCK_BRICK],
+        [4, 1, BLOCK_BRICK],
+        [5, 1, BLOCK_BRICK],
+        [6, 1, BLOCK_BRICK],
+        [8, 1, BLOCK_BRICK],
+        [4, 7, BLOCK_BRICK],
+        [4, 6, BLOCK_BRICK],
+        [5, 6, BLOCK_BRICK],
+        [6, 6, BLOCK_BRICK],
+        [6, 7, BLOCK_BRICK],
+        [3, 2, BLOCK_BUSH],
+        [4, 2, BLOCK_BUSH],
+        [5, 2, BLOCK_BUSH],
+        [6, 2, BLOCK_BUSH],
+        [3, 3, BLOCK_BUSH],
+        [3, 4, BLOCK_BUSH],
+        [3, 5, BLOCK_BUSH],
+        [4, 5, BLOCK_BUSH],
+        [5, 5, BLOCK_BUSH],
+        [6, 5, BLOCK_BUSH],
+        [6, 4, BLOCK_BUSH],
+        [6, 3, BLOCK_BUSH],
+        [5, 3, BLOCK_WATER],
+        [4, 3, BLOCK_WATER],
+        [5, 4, BLOCK_WATER],
+        [4, 4, BLOCK_WATER],
+]
+
+level2_map = [
+        [4, 0, ENEMY_TANK1],
+        [9, 0, ENEMY_TANK1],
+        [0, 0, ENEMY_TANK1],
+        [0, 6, BLOCK_IRON],
+        [1, 6, BLOCK_IRON],
+        [8, 6, BLOCK_IRON],
+        [9, 6, BLOCK_IRON],
+        [0, 1, BLOCK_BRICK],
+        [9, 1, BLOCK_BRICK],
+        [1, 1, BLOCK_BRICK],
+        [2, 3, BLOCK_BRICK],
+        [2, 4, BLOCK_BRICK],
+        [7, 3, BLOCK_BRICK],
+        [7, 4, BLOCK_BRICK],
+        [8, 5, BLOCK_BRICK],
+        [1, 5, BLOCK_BRICK],
+        [1, 2, BLOCK_BRICK],
+        [5, 6, BLOCK_BRICK],
+        [6, 6, BLOCK_BRICK],
+        [6, 7, BLOCK_BRICK],
+        [3, 2, BLOCK_BUSH],
+        [4, 2, BLOCK_BUSH],
+        [5, 2, BLOCK_BUSH],
+        [6, 2, BLOCK_BUSH],
+        [3, 3, BLOCK_BUSH],
+        [6, 5, BLOCK_BUSH],
+        [6, 4, BLOCK_BUSH],
+        [6, 3, BLOCK_BUSH],
+        [5, 3, BLOCK_WATER],
+        [4, 4, BLOCK_WATER],
+]
+
+all_levels_map = [
+    ["level_one_background1.bmp", "level_one_background2.bmp", level1_map],
+    ["level_two_background1.bmp", "level_two_background2.bmp", level2_map],
+]
