@@ -6,7 +6,7 @@
 
 # PyBadge screen size is 160x128 and sprites are 16x16
 DEBUG = 0
-
+mute_audio = False
 
 BLOCK_IRON  = 3
 BLOCK_BRICK = 4

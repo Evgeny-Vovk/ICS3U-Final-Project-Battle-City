@@ -319,7 +319,7 @@ class Bullet(stage.Sprite):
 
 def splash_scene():
     # get sound ready
-    functions.add_sound("coin.wav")
+    functions.play_sound("coin.wav")
 
     image_bank_background = stage.Bank.from_bmp16("mt_game_studio.bmp")
     background = functions.get_background(image_bank_background)
@@ -331,6 +331,7 @@ def splash_scene():
     del image_bank_background
 
     time.sleep(2.0)
+    functions.stop_sound()
 
 def display_level_name(level_number):
     global level_tiles
@@ -402,11 +403,10 @@ def exit_game(success):
     if success == 1:
         image_level_bank_background1 = stage.Bank.from_bmp16("win_background1.bmp")
         image_level_bank_background2 = stage.Bank.from_bmp16("win_background2.bmp")
-        functions.add_sound("game_start.wav")
+        functions.play_sound("game_start.wav")
     else:
         image_level_bank_background1 = stage.Bank.from_bmp16("lose_background1.bmp")
         image_level_bank_background2 = stage.Bank.from_bmp16("lose_background2.bmp")
-        functions.add_sound("game_lose.wav")
 
     tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background1)
     tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background2)
@@ -421,10 +421,11 @@ def game_scene(level_number, level_map):
     global enemy_lifes
     global my_tank
 
-    functions.add_sound("game_start.wav")
+    functions.play_sound("game_start.wav")
     display_level_name(level_number)
+    functions.stop_sound()
 
-    functions.add_sound("game_sound.wav", True)
+    functions.play_sound("game_sound.wav", True)
     load_level_map(level_map, level_number)
 
     sprites = [my_tank] + tanks + bullets
@@ -443,6 +444,8 @@ def game_scene(level_number, level_map):
     isLevelSucceed = True if my_tank.isAlive else False
     number = 0
     clear_objects()
+    functions.stop_sound()
+
     return isLevelSucceed
 
 def get_selected_menu():
@@ -493,29 +496,36 @@ def get_selected_menu():
     keys = 0
     while True:
     # get user input
-        keys = ugame.buttons.get_pressed()
+        pressed_keys = ugame.buttons.get_pressed()
+        if keys != pressed_keys:
+            while pressed_keys == ugame.buttons.get_pressed():
+                time.sleep(0.1)
+            keys = pressed_keys
 
-        if keys & ugame.K_UP != 0:
-            menu_tank[0].move(30, 63)
-            mode = 0
-        if keys & ugame.K_DOWN != 0:
-            menu_tank[0].move(30, 78)
-            mode = 1
-        if keys & ugame.K_START != 0:
-            break
+            if keys & ugame.K_UP != 0:
+                menu_tank[0].move(30, 63)
+                mode = 0
+            if keys & ugame.K_DOWN != 0:
+                menu_tank[0].move(30, 78)
+                mode = 1
+            if keys & ugame.K_START != 0:
+                break
+            if keys & ugame.K_SELECT != 0:
+                constants.mute_audio = not constants.mute_audio
+            # redraw Sprites
+            game.render_sprites(menu_tank)
+            game.tick()
+        else:
+            time.sleep(0.1)
 
-        # redraw Sprites
-        game.render_sprites(menu_tank)
-        game.tick()
-
-    while keys == ugame.buttons.get_pressed():
-        time.sleep(0.5)
     return mode
 
 def controls_scene():
     pass
 
 def main_scene():
+    #AV: ugame.audio.mute(True)
+    #AV: ugame.audio.stop()
     # this function is the main game game_scene
 
     # used this program to split the image into tile:

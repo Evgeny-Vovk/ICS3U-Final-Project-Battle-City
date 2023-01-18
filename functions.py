@@ -1,6 +1,7 @@
 import ugame
 import stage
 import constants
+import time
 
 DEBUG = constants.DEBUG
 
@@ -35,15 +36,15 @@ def get_background(loaded_image):
     return background
 
 
-def add_sound(loaded_audio, loop = False):
+def play_sound(loaded_audio, loop = False):
     audio = open(loaded_audio, "rb")
-    sound = ugame.audio
-    sound.stop()
+    ugame.audio.mute(constants.mute_audio)
     if DEBUG:
-        sound.mute(True)
-    else:
-        sound.mute(False)
-    sound.play(audio, loop = loop)
+        ugame.audio.mute(True)
+    ugame.audio.play(audio, loop = loop)
+
+def stop_sound():
+    ugame.audio.stop()
 
 def fill_background(tiles, tile_offset, loaded_image, tile_range = range(0, 16),offset_x = 0 , offset_y = 0):
     for i in tile_range:
