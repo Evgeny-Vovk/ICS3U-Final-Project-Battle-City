@@ -41,17 +41,19 @@ def add_sound(loaded_audio, loop = False):
     sound.stop()
     if DEBUG:
         sound.mute(True)
+    else:
+        sound.mute(False)
     sound.play(audio, loop = loop)
 
-def fill_background(tiles, tile_offset, loaded_image, tile_range = range(0, 16)):
+def fill_background(tiles, tile_offset, loaded_image, tile_range = range(0, 16),offset_x = 0 , offset_y = 0):
     for i in tile_range:
         x = (tile_offset+i) % 10
         y = int((tile_offset+i) / 10)
         a_single_tile = stage.Sprite(
             loaded_image,
             i,
-            (x * 16),
-            (y * 16),
+            (x * 16 + offset_x),
+            (y * 16 + offset_y),
         )
         tiles.append(a_single_tile)
     return tile_offset + 16

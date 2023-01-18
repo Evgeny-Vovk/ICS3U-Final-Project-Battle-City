@@ -16,9 +16,12 @@ import functions
 DEBUG = constants.DEBUG
 global_speed = 1
 image_bank_sprites = stage.Bank.from_bmp16("sprite_sheet.bmp")
+image_bank_sprites = stage.Bank.from_bmp16("sprite_sheet.bmp")
 menu_display = []
 menu_tiles = []
+level_tiles = []
 menu_tank = []
+level_number_tile = None
 
 bullets = []
 my_tank = None
@@ -225,6 +228,9 @@ class EnemyTank(stage.Sprite):
             self.move(-16, -16)
             self.isAlive = False
             enemy_lifes -= 1
+            for tank in tanks:
+                if tank == self:
+                    tanks.remove(tank)
 
 class Block(stage.Sprite):
     def __init__(self, x, y, block_type):
@@ -251,6 +257,7 @@ class Bullet(stage.Sprite):
         self.strength = strength
         self.rotation = 1
         self.isAlive = False
+        self.isActive = False
         self.isEnemy = isEnemy
 
     def update(self, frame):
@@ -304,6 +311,7 @@ class Bullet(stage.Sprite):
         self.move(self.x, self.y)
         self.set_frame(None, self.rotation)
         self.isAlive = True
+        self.isActive = True
 
     def kill(self):
         self.isAlive = False
@@ -324,34 +332,46 @@ def splash_scene():
 
     time.sleep(2.0)
 
-def display_level_name(image1, image2):
-    functions.add_sound("game_start.wav")
+def display_level_name(level_number):
+    global level_tiles
+    global level_number_tile
+    tile_offset = 0
 
-    #ToDo
-    tile_offset = 25
-    level_tiles = []
+    image_level_bank_background = stage.Bank.from_bmp16("level_background.bmp")
+    tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background, range(11, 16), 10, 40)
+    if not level_number_tile:
+        level_number_tile = stage.Sprite(image_level_bank_background,level_number+2,115,56,)
+    level_number_tile.set_frame(level_number+2)
 
-    image_level_bank_background1 = stage.Bank.from_bmp16(image1)
-    image_level_bank_background2 = stage.Bank.from_bmp16(image2)
-
-    tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background1)
-    tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background2)
+    del image_level_bank_background
 
     game = stage.Stage(ugame.display, constants.FPS)
-    game.layers = level_tiles
+    game.layers = level_tiles + [level_number_tile]
     game.render_block()
-
-    del image_level_bank_background1
-    del image_level_bank_background2
 
     time.sleep(4.3)
 
-def load_level_map(level):
+def load_level_map(level_map, level_number):
     global my_tank
     global enemy_lifes
-    my_tank = (Tank(3, 7))
-    base.append(Base(5, 7, constants.BASE))
-    for item in level:
+    if level_number == 0 or level_number == 1:
+        base.append(Base(5, 7, constants.BASE))
+        my_tank = (Tank(3, 7))
+    elif level_number == 2 or level_number == 3:
+        base.append(Base(3, 7, constants.BASE))
+        base.append(Base(6, 7, constants.BASE))
+        if level_number == 2:
+            my_tank = (Tank(4, 7))
+        elif level_number == 3:
+            my_tank = (Tank(3, 6))
+    elif level_number == 4:
+        base.append(Base(3, 7, constants.BASE))
+        base.append(Base(5, 7, constants.BASE))
+        base.append(Base(7, 7, constants.BASE))
+        my_tank = (Tank(3, 6))
+    else:
+        exit_game(1)
+    for item in level_map:
             if item[2] == constants.BLOCK_IRON:
                 irons.append(Block(*item))
             elif item[2] == constants.BLOCK_BRICK:
@@ -375,14 +395,18 @@ def clear_objects():
     base.clear()
     bullets.clear()
 
-def lost():
-    functions.add_sound("game_start.wav")
-
+def exit_game(success):
     tile_offset = 20
     level_tiles = []
 
-    image_level_bank_background1 = stage.Bank.from_bmp16("lose_background1.bmp")
-    image_level_bank_background2 = stage.Bank.from_bmp16("lose_background2.bmp")
+    if success == 1:
+        image_level_bank_background1 = stage.Bank.from_bmp16("win_background1.bmp")
+        image_level_bank_background2 = stage.Bank.from_bmp16("win_background2.bmp")
+        functions.add_sound("game_start.wav")
+    else:
+        image_level_bank_background1 = stage.Bank.from_bmp16("lose_background1.bmp")
+        image_level_bank_background2 = stage.Bank.from_bmp16("lose_background2.bmp")
+        functions.add_sound("game_lose.wav")
 
     tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background1)
     tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background2)
@@ -393,14 +417,15 @@ def lost():
 
     time.sleep(4.3)
 
-def game_scene(level_items):
+def game_scene(level_number, level_map):
     global enemy_lifes
     global my_tank
 
-    display_level_name(level_items[0], level_items[1])
+    functions.add_sound("game_start.wav")
+    display_level_name(level_number)
 
     functions.add_sound("game_sound.wav", True)
-    load_level_map(level_items[2])
+    load_level_map(level_map, level_number)
 
     sprites = [my_tank] + tanks + bullets
 
@@ -413,10 +438,10 @@ def game_scene(level_items):
         frame += 1
         for sprite in sprites:
             sprite.update(frame)
-            #ToDo
         game.render_sprites(sprites)
 
     isLevelSucceed = True if my_tank.isAlive else False
+    number = 0
     clear_objects()
     return isLevelSucceed
 
@@ -498,7 +523,7 @@ def main_scene():
     splash_scene()
 
     if DEBUG:
-        status = game_scene(constants.all_levels_map[0])
+        status = game_scene(constants.all_levels_map)
         print(status)
         time.sleep(10.0)
 
@@ -507,11 +532,11 @@ def main_scene():
         mode = get_selected_menu()
         if mode == 0:
             status = True
-            for level in constants.all_levels_map:
+            for level_number, level_map in enumerate(constants.all_levels_map):
                 if status:
-                    status = game_scene(level)
+                    status = game_scene(level_number, level_map)
                 else:
-                    lost()
+                    exit_game(0)
                     break
         elif mode == 1:
             controls_scene()
