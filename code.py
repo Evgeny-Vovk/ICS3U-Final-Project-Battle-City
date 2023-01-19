@@ -416,8 +416,6 @@ def exit_game(success):
         tile_offset = 32
         tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background, range(11, 15))
 
-    level_tiles = []
-
     game = stage.Stage(ugame.display, constants.FPS)
     game.layers = level_tiles
     game.render_block()
