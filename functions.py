@@ -1,3 +1,4 @@
+
 import ugame
 import stage
 import constants
@@ -61,7 +62,7 @@ def fill_background(tiles, tile_offset, loaded_image, tile_range = range(0, 16),
 
 def print_text(display, text, x_pos, y_pos):
     t_obj = stage.Text(
-        width=len(text), height=1, font=None, buffer=None
+        width=len(text), height=10, font=None, buffer=None
     )
     t_obj.move(x_pos, y_pos)
     t_obj.text(text)

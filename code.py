@@ -18,9 +18,12 @@ global_speed = 1
 image_bank_sprites = stage.Bank.from_bmp16("sprite_sheet.bmp")
 image_bank_sprites = stage.Bank.from_bmp16("sprite_sheet.bmp")
 menu_display = []
+controls_display = []
 menu_tiles = []
+controls_tiles = []
 level_tiles = []
 menu_tank = []
+controls_tank = []
 level_number_tile = None
 
 bullets = []
@@ -403,13 +406,17 @@ def exit_game(success):
     if success == 1:
         image_level_bank_background1 = stage.Bank.from_bmp16("win_background1.bmp")
         image_level_bank_background2 = stage.Bank.from_bmp16("win_background2.bmp")
+        tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background1)
+        tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background2)
         functions.play_sound("game_start.wav")
     else:
-        image_level_bank_background1 = stage.Bank.from_bmp16("lose_background1.bmp")
-        image_level_bank_background2 = stage.Bank.from_bmp16("lose_background2.bmp")
+        image_level_bank_background = stage.Bank.from_bmp16("lose_background.bmp")
+        tile_offset = 22
+        tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background, range(1,5))
+        tile_offset = 32
+        tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background, range(11, 15))
 
-    tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background1)
-    tile_offset = functions.fill_background(level_tiles, tile_offset, image_level_bank_background2)
+    level_tiles = []
 
     game = stage.Stage(ugame.display, constants.FPS)
     game.layers = level_tiles
@@ -471,7 +478,6 @@ def get_selected_menu():
         del image_bank_background5
 
     if not len(menu_display):
-        functions.print_text(menu_display, "High score:", 10, 10)
         functions.print_text(menu_display, "Play", 50, 70)
         functions.print_text(menu_display, "Controls", 50, 85)
 
@@ -521,7 +527,61 @@ def get_selected_menu():
     return mode
 
 def controls_scene():
-    pass
+    if not len(controls_tiles):
+        tile_offset = 16
+
+        image_bank_background1 = stage.Bank.from_bmp16("controls_background1.bmp")
+        image_bank_background2 = stage.Bank.from_bmp16("controls_background2.bmp")
+        image_bank_background3 = stage.Bank.from_bmp16("controls_background3.bmp")
+
+        tile_offset = functions.fill_background(controls_tiles, tile_offset, image_bank_background1)
+        tile_offset = functions.fill_background(controls_tiles, tile_offset, image_bank_background2)
+        tile_offset = functions.fill_background(controls_tiles, tile_offset, image_bank_background3)
+
+        del image_bank_background1
+        del image_bank_background2
+        del image_bank_background3
+
+    if not len(controls_display):
+        functions.print_text(controls_display, "Mute - Select", 5, 90)
+        functions.print_text(controls_display, "Confirm - Start", 5, 100)
+        functions.print_text(controls_display, "Shoot - A", 5, 110)
+        functions.print_text(controls_display, "Move - Up,Down,Left", 5, 20)
+        functions.print_text(controls_display, "And Right", 5, 30)
+        functions.print_text(controls_display, "Exit", 30, 5)
+
+
+    if not len(controls_tank):
+        image_bank_background = stage.Bank.from_bmp16("menu_background1.bmp")
+        tank = stage.Sprite(
+            image_bank_background,
+            1,
+            10,
+            -3,
+        )
+        controls_tank.append(tank)
+        del image_bank_background
+
+    game = stage.Stage(ugame.display, constants.FPS)
+    game.layers = controls_tank + controls_display + controls_tiles
+    game.render_block()
+
+    while True:
+        keys = ugame.buttons.get_pressed()
+
+        if keys & ugame.K_UP != 0:
+            pass
+        if keys & ugame.K_DOWN != 0:
+            pass
+        if keys & ugame.K_START != 0:
+            pass
+        if keys & ugame.K_SELECT != 0:
+            return
+        # redraw Sprites
+        game.render_sprites(controls_tank)
+        game.tick()
+
+    return mode
 
 def main_scene():
     #AV: ugame.audio.mute(True)
